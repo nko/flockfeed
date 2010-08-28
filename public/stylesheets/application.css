@@ -46,6 +46,8 @@ a {
   box-shadow: 0 10px 10px rgba(0, 0, 0, 0.3);
   filter: "progid:DXImageTransform.Microsoft.dropshadow(OffX=0, OffY=10px, Color='rgba(0, 0, 0, 0.3)')";
   -ms-filter: "\"progid:DXImageTransform.Microsoft.dropshadow(OffX=0, OffY=10px, Color='rgba(0, 0, 0, 0.3)')\""; }
+  #content > h1:first-child {
+    margin-top: 0; }
 
 #content_top {
   background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#cccccc), to(#999999));
