@@ -6,6 +6,7 @@
     "oauth":"",
     "ejs":"",
     "mongodb":"",
-    "hoptoad-notifier":""
+    "hoptoad-notifier":"",
+    "jsdom":""
   }
 }
