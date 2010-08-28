@@ -82,35 +82,33 @@ app.get '/home', (req,res)->
       current_user:current_user
 
 app.get '/readability', (req, res)->
-  sys.puts "Starting readability"
   if typeof(req.param('url')) == 'undefined'
-    res.render 'home.ejs'
-  else
-    parsedUrl = url.parse(req.param('url'))
-    headers = { 'User-Agent': 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en-US; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8' }
-    httpClient = http.createClient(80, parsedUrl.hostname)
-    request = httpClient.request('GET', parsedUrl.pathname + "?" + querystring.stringify(parsedUrl.query), headers)
-    result = "";
+    res.redirect 'home'
+    return
 
-    request.addListener 'response', (response)->
-      response.addListener 'data', (chunk)->
-        result+= chunk
-      response.addListener 'end', ->
-        sys.puts "Raw"
-        # sys.puts result
+  parsedUrl = url.parse(req.param('url'))
+  headers = { 'User-Agent': 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en-US; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8' }
+  httpClient = http.createClient(80, parsedUrl.hostname)
+  request = httpClient.request('GET', parsedUrl.pathname + "?" + querystring.stringify(parsedUrl.query), headers)
+  result = "";
 
-        htmlDom = htmlparser.ParseHtml(result)
-        sys.puts "Parsed HTML"
-        # sys.puts(sys.inspect(htmlDom, false, null));
+  request.addListener 'response', (response)->
+    response.addListener 'data', (chunk)->
+      result+= chunk
+    response.addListener 'end', ->
+      level = jsdom.defaultLevel
+      doc = new (level.Document)()
+      doc.createWindow = ->
+        window = jsdom.windowAugmentation(level, { document: doc, parser: htmlparser })
+        delete window.document.createWindow
+        return window
+      window = doc.createWindow()
+      window.document.innerHTML = result;
+      content = readability.parse(window.document)
+      res.render 'readability.ejs', locals:
+        { content: content.innerHTML, url: req.param('url') }
 
-        domWindow = jsdom.createWindow(htmlDom)
-        sys.puts "Parsed DOM"
-        # sys.puts(sys.inspect(domWindow.document, false, null));
-
-        content = readability.parseArticle(domWindow.document)
-        sys.puts "Parsed content"
-        sys.puts(sys.inspect(content.innerHTML, false, null));
-    request.end();
+  request.end();
 
 
 app.get '/feeds/:key', (req, res) ->
