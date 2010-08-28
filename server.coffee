@@ -3,6 +3,13 @@ require.paths.unshift './vendor'
 require 'express'
 require 'oauth'
 
+#http = require 'http'
+#querystring = require 'querystring'
+#jsdom = require 'jsdom'
+#htmlparser = require './htmlparser'
+#readability = require './readability'
+
+
 crypto = require('crypto')
 sys = require 'sys'
 OAuth = require('oauth').OAuth
@@ -11,14 +18,7 @@ connect = require 'connect'
 express = require 'express'
 ejs = require 'ejs'
 Twitter = new OAuth('http://api.twitter.com/oauth/request_token', 'http://api.twitter.com/oauth/access_token', process.env.TWITTER_KEY, process.env.TWITTER_SECRET, '1.0', null, 'HMAC-SHA1')
-http = require 'http'
-querystring = require 'querystring'
-jsdom = require 'jsdom'
-htmlparser = require './htmlparser'
-readability = require './readability'
-
 User = require('./user').User
-User.init process.env.MONGO_SERVER || 'localhost', process.env.MONGO_PORT || 27017, process.env.MONGO_USERNAME, process.env.MONGO_PASS
 
 # Setup Hoptoad Notification
 if process.env.RACK_ENV == 'production'

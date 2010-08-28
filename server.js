@@ -1,5 +1,5 @@
 (function() {
-  var OAuth, Twitter, User, app, connect, crypto, ejs, express, hoptoad, htmlparser, http, jsdom, querystring, readability, sys, url;
+  var OAuth, Twitter, User, app, connect, crypto, ejs, express, hoptoad, sys, url;
   require.paths.unshift('./vendor');
   require('express');
   require('oauth');
@@ -11,13 +11,7 @@
   express = require('express');
   ejs = require('ejs');
   Twitter = new OAuth('http://api.twitter.com/oauth/request_token', 'http://api.twitter.com/oauth/access_token', process.env.TWITTER_KEY, process.env.TWITTER_SECRET, '1.0', null, 'HMAC-SHA1');
-  http = require('http');
-  querystring = require('querystring');
-  jsdom = require('jsdom');
-  htmlparser = require('./htmlparser');
-  readability = require('./readability');
   User = require('./user').User;
-  User.init(process.env.MONGO_SERVER || 'localhost', process.env.MONGO_PORT || 27017, process.env.MONGO_USERNAME, process.env.MONGO_PASS);
   if (process.env.RACK_ENV === 'production') {
     hoptoad = require('hoptoad-notifier').Hoptoad;
     hoptoad.key = '63da924b138bae57d1066c46accddbe7';

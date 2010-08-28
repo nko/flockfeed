@@ -71,5 +71,5 @@ User =
             user._id = hash.id
             user.key = crypto.createHash('sha1').update("--#{hash.id}-url-hash").digest('hex')
             User.create user, callback
-        
+            
 exports.User = User
