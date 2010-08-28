@@ -1,5 +1,5 @@
 (function() {
-  var OAuth, Twitter, User, app, connect, crypto, ejs, express, hoptoad, sys, url;
+  var OAuth, Twitter, User, app, connect, crypto, ejs, express, hoptoad, pollInterval, sys, url;
   require.paths.unshift('./vendor');
   require('express');
   require('oauth');
@@ -110,5 +110,11 @@
       return request.end();
     }
   });
+  pollInterval = 3;
+  setInterval(function() {
+    var since;
+    since = new Date(new Date().getTime() - pollInterval * 1000);
+    return User.fetchOutdated(since);
+  }, pollInterval * 1000);
   app.listen(parseInt(process.env.PORT) || 3000);
 })();

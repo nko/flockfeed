@@ -6,10 +6,10 @@ ObjectID = require('mongodb/bson/bson').ObjectID
 Server = require('mongodb/connection').Server
 crypto = require 'crypto'
 
-User = 
+User =
   init:(host, port, username, password)->
     User.db = new DB process.env.MONGO_DATABASE || 'flockfeeds', new Server(process.env.MONGO_HOST || 'localhost', process.env.MONGO_PORT || 27017, auto_reconnect:true)
-  
+
   open:(callback)->
     User.init() unless User.db
     User.db.open ->
@@ -21,7 +21,7 @@ User =
             callback null, true
       else
         callback null, true
-        
+
   collection:(callback)->
     User.open ->
       User.db.collection 'users', (error, users_collection)->
@@ -41,7 +41,7 @@ User =
             callback error
           else
             callback null, docs[0]
-  
+
   find:(id,callback)->
     User.collection (error,users)->
       if error
@@ -52,13 +52,13 @@ User =
           callback error
         else
           callback null, user
-  
+
   sign_in:(hash, access_token, access_secret, callback)->
     User.collection (error, users)->
       if error
         callback error
       else
-        user = 
+        user =
           screen_name:hash.screen_name
           name:hash.name
           access:
@@ -68,9 +68,24 @@ User =
           if existing
             sys.puts 'Existing user found...'
             callback null, existing
-          else        
+          else
             user._id = hash.id
             user.key = crypto.createHash('sha1').update("--#{hash.id}-url-hash").digest('hex')
             User.create user, callback
-            
+
+  fetchOutdated:(since) ->
+    User.collection (error, users) ->
+      if error
+        sys.puts error
+      else
+        users.find {last_fetched: {'$lt': since}}, (error, cursor) ->
+          if error
+            sys.puts error
+          else
+            cursor.each (error, user) ->
+              if user != null
+                sys.puts "  " + user._id + " " + user.last_fetched
+                # TODO: fetch user data, update last_fetched
+                users.update({_id: user._id}, {"$set": {last_fetched: new Date()}}, (error, result) -> )
+
 exports.User = User

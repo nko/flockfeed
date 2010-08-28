@@ -32,7 +32,7 @@ app.set 'view engine', 'ejs'
 
 app.get '/', (req,res)->
   res.render 'splash.ejs'
-  
+
 app.get '/sign_in', (req, res)->
   Twitter.getOAuthRequestToken (error, token, secret, url, params)->
     if error
@@ -46,7 +46,7 @@ app.get '/oauth/callback', (req, res)->
   unless req.session['req.token']
     res.redirect '/sign_in'
     return
-    
+
   Twitter.getOAuthAccessToken req.session['req.token'], req.session['req.secret'], (error, access_token, access_secret, params)->
     if error
       res.send error
@@ -106,4 +106,14 @@ app.get '/readability', (req, res)->
         sys.puts(sys.inspect(content.innerHTML, false, null));
     request.end();
 
+
+# periodically fetch user timelines
+pollInterval = 3 # seconds
+setInterval ->
+  since = new Date(new Date().getTime() - pollInterval * 1000)
+  User.fetchOutdated since
+, pollInterval * 1000
+
 app.listen parseInt(process.env.PORT) || 3000
+
+

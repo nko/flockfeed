@@ -29,7 +29,7 @@
             callback(error);
           } else {
             callback(null, users_collection);
-          }
+          };
           return User.db.close();
         });
       });
@@ -81,6 +81,28 @@
             }
           });
         }
+      });
+    },
+    fetchOutdated: function(since) {
+      return User.collection(function(error, users) {
+        return error ? sys.puts(error) : users.find({
+          last_fetched: {
+            '$lt': since
+          }
+        }, function(error, cursor) {
+          return error ? sys.puts(error) : cursor.each(function(error, user) {
+            if (user !== null) {
+              sys.puts("  " + user._id + " " + user.last_fetched);
+              return users.update({
+                _id: user._id
+              }, {
+                "$set": {
+                  last_fetched: new Date()
+                }
+              }, function(error, result) {});
+            }
+          });
+        });
       });
     }
   };
