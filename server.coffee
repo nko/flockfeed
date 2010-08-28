@@ -57,23 +57,33 @@ app.get '/oauth/callback', (req, res)->
         res.send error
         return
       sys.puts "Creating user in Mongo..."
-      User.sign_in JSON.parse(data), access_token, access_secret, (error, user)->
-        if error
-          res.send error
+      hash = JSON.parse(data)
+      User.find().where('id',hash.id).first (user)->
+        if user
+          sys.puts "Found existing user..."
+          req.session.user_id = user.id
+          res.redirect '/home'
         else
-          req.session['user_id'] = user._id
-          res.redirect "/home"
+          sys.puts "Creating new user..."
+          user = new User()
+          user.id = hash.id
+          user.screen_name = hash.screen_name
+          user.name = hash.name
+          user.access.token = access_token
+          user.access.secret = access_secret
+          user.save ->
+            sys.puts sys.inspect(user)
+            req.session.user_id = user.id
+            res.redirect '/home'
 
 app.get '/home', (req,res)->
   unless req.session.user_id
     res.redirect 'sign_in'
     return
-  User.find req.session.user_id,(error,current_user)->
-    if error
-      res.send error
-    else
-      res.render 'home.ejs', locals:
-        current_user:current_user
+  sys.puts sys.inspect(req.session)
+  User.findById parseInt(req.session.user_id),(current_user)->
+    res.render 'home.ejs', locals:
+      current_user:current_user
 
 app.get '/readability', (req, res)->
   sys.puts "Starting readability"

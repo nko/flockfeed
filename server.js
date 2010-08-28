@@ -49,17 +49,31 @@
       }
       sys.puts("Retrieving user info...");
       return Twitter.getProtectedResource('http://api.twitter.com/1/account/verify_credentials.json', 'GET', access_token, access_secret, function(error, data, response) {
+        var hash;
         if (error) {
           res.send(error);
           return null;
         }
         sys.puts("Creating user in Mongo...");
-        return User.sign_in(JSON.parse(data), access_token, access_secret, function(error, user) {
-          if (error) {
-            return res.send(error);
+        hash = JSON.parse(data);
+        return User.find().where('id', hash.id).first(function(user) {
+          if (user) {
+            sys.puts("Found existing user...");
+            req.session.user_id = user.id;
+            return res.redirect('/home');
           } else {
-            req.session['user_id'] = user._id;
-            return res.redirect("/home");
+            sys.puts("Creating new user...");
+            user = new User();
+            user.id = hash.id;
+            user.screen_name = hash.screen_name;
+            user.name = hash.name;
+            user.access.token = access_token;
+            user.access.secret = access_secret;
+            return user.save(function() {
+              sys.puts(sys.inspect(user));
+              req.session.user_id = user.id;
+              return res.redirect('/home');
+            });
           }
         });
       });
@@ -70,8 +84,9 @@
       res.redirect('sign_in');
       return null;
     }
-    return User.find(req.session.user_id, function(error, current_user) {
-      return error ? res.send(error) : res.render('home.ejs', {
+    sys.puts(sys.inspect(req.session));
+    return User.findById(parseInt(req.session.user_id), function(current_user) {
+      return res.render('home.ejs', {
         locals: {
           current_user: current_user
         }
