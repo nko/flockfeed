@@ -16,9 +16,10 @@ hoptoad.key = '63da924b138bae57d1066c46accddbe7'
 process.addListener 'uncaughtException', (error)->
   hoptoad.notify(error)
 
-app = express.createServer connect.cookieDecoder(), connect.session()
+app = express.createServer connect.cookieDecoder(), connect.session(), express.staticProvider(__dirname + '/public')
+app.set 'view engine', 'ejs'
 
 app.get '/', (req,res)->
-  res.send "Hello from Express!"
+  res.render 'home.ejs'
 
 app.listen parseInt(process.env.PORT) || 3000

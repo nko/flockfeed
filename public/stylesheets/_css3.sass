@@ -1,0 +1,89 @@
+//
+// Rounded Corners
+//
+
+=border-radius($radius)
+  -moz-border-radius: $radius
+  -webkit-border-radius: $radius
+  border-radius: $radius
+  
+=border-top-left-radius($radius)
+  -moz-border-radius-topleft: $radius
+  -webkit-border-top-left-radius: $radius
+  border-top-left-radius: $radius
+  
+=border-top-right-radius($radius)
+  -moz-border-radius-topright: $radius
+  -webkit-border-top-right-radius: $radius
+  border-top-right-radius: $radius
+  
+=border-bottom-left-radius($radius)
+  -moz-border-radius-bottomleft: $radius
+  -webkit-border-bottom-left-radius: $radius
+  border-bottom-left-radius: $radius
+  
+=border-bottom-right-radius($radius)
+  -moz-border-radius-bottomright: $radius
+  -webkit-border-bottom-right-radius: $radius
+  border-bottom-right-radius: $radius
+
+=border-top-radius($radius)
+  +border-top-right-radius($radius)
+  +border-top-left-radius($radius)
+  
+=border-bottom-radius($radius)
+  +border-bottom-right-radius($radius)
+  +border-bottom-left-radius($radius)
+  
+=border-left-radius($radius)
+  +border-top-left-radius($radius)
+  +border-bottom-left-radius($radius)
+  
+=border-right-radius($radius)
+  +border-top-right-radius($radius)
+  +border-bottom-right-radius($radius)
+  
+//
+// Box Shadow
+//
+
+=box-shadow($x, $y, $blur, $color : black)
+  -moz-box-shadow: $x $y $blur $color /* FF3.5+ */
+  -webkit-box-shadow: $x $y $blur $color /* Saf3.0+, Chrome */
+  box-shadow: $x $y $blur $color /* Opera 10.5, IE 9.0 */
+  // IE 6, 7
+  filter: "progid:DXImageTransform.Microsoft.dropshadow(OffX=#{$x}, OffY=#{$y}, Color='#{$color}')"
+  // IE 8
+  -ms-filter: "\"progid:DXImageTransform.Microsoft.dropshadow(OffX=#{$x}, OffY=#{$y}, Color='#{$color}')\""
+  
+//
+// Gradients
+//
+
+=vertical-gradient($from, $to, $bgcolor : "")
+  @if $bgcolor != ""
+    background-color: $bgcolor
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#{$from}), to(#{$to}))
+  background-image: -moz-linear-gradient(top, #{$from}, #{$to})
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#{$from}', endColorstr='#{$to}')
+  -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#{$from}', endColorstr='#{$to}')"
+
+=horizontal-gradient($from, $to, $bgcolor : "")
+  @if $bgcolor != ""
+    background-color: $bgcolor
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#{$from}), to(#{$to}))
+  background-image: -moz-linear-gradient(top, #{$from}, #{$to})
+  // No IE style that I'm aware of does this.
+
+
+//
+// Rotation
+//
+
+=rotate($degrees)
+  $percent: $degrees / 360.0
+  -moz-transform: rotate(#{$degrees}deg)
+  -o-transform: rotate(#{$degrees})
+  -webkit-transform: rotate(#{$degrees}deg)
+  filter:  progid:DXImageTransform.Microsoft.BasicImage(rotation=#{$percent})
+  -ms-filter: "progid:DXImageTransform.Microsoft.BasicImage(rotation=#{$percent})"

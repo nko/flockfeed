@@ -14,9 +14,10 @@
   process.addListener('uncaughtException', function(error) {
     return hoptoad.notify(error);
   });
-  app = express.createServer(connect.cookieDecoder(), connect.session());
+  app = express.createServer(connect.cookieDecoder(), connect.session(), express.staticProvider(__dirname + '/public'));
+  app.set('view engine', 'ejs');
   app.get('/', function(req, res) {
-    return res.send("Hello from Express!");
+    return res.render('home.ejs');
   });
   app.listen(parseInt(process.env.PORT) || 3000);
 })();
