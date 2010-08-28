@@ -26,25 +26,46 @@
         });
       });
     },
-    retrieve: function(hash, callback) {
+    find: function(id, callback) {
       return User.collection(function(error, users) {
+        if (error) {
+          callback(error);
+          return null;
+        }
         return users.findOne({
-          _id: hash.id
-        }, function(error, existing) {
-          var user;
-          if (existing) {
-            sys.puts('Existing user found!');
-            return callback(null, existing);
-          } else {
-            user = {
-              _id: hash.id,
-              key: crypto.createHash('sha1').update(("--" + (hash.id) + "-url-hash")).digest(),
-              screen_name: hash.screen_name,
-              name: hash.name
-            };
-            return User.create(user, callback);
-          }
+          _id: id
+        }, function(error, user) {
+          return error ? callback(error) : callback(null, user);
         });
+      });
+    },
+    sign_in: function(hash, access_token, access_secret, callback) {
+      return User.collection(function(error, users) {
+        var user;
+        if (error) {
+          return callback(error);
+        } else {
+          user = {
+            screen_name: hash.screen_name,
+            name: hash.name,
+            access: {
+              token: access_token,
+              secret: access_secret
+            }
+          };
+          return users.findOne({
+            _id: hash.id
+          }, function(error, existing) {
+            if (existing) {
+              sys.puts('Existing user found...');
+              return callback(null, existing);
+            } else {
+              user._id = hash.id;
+              user.key = crypto.createHash('sha1').update(("--" + (hash.id) + "-url-hash")).digest('hex');
+              return User.create(user, callback);
+            }
+          });
+        }
       });
     }
   };

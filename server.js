@@ -25,7 +25,7 @@
   }));
   app.set('view engine', 'ejs');
   app.get('/', function(req, res) {
-    return res.render('home.ejs');
+    return res.render('splash.ejs');
   });
   app.get('/sign_in', function(req, res) {
     return Twitter.getOAuthRequestToken(function(error, token, secret, url, params) {
@@ -39,7 +39,10 @@
     });
   });
   app.get('/oauth/callback', function(req, res) {
-    sys.puts("Retrieving Access Token...");
+    if (!(req.session['req.token'])) {
+      res.redirect('/sign_in');
+      return null;
+    }
     return Twitter.getOAuthAccessToken(req.session['req.token'], req.session['req.secret'], function(error, access_token, access_secret, params) {
       if (error) {
         res.send(error);
@@ -52,9 +55,27 @@
           return null;
         }
         sys.puts("Creating user in Mongo...");
-        return User.retrieve(JSON.parse(data), function(error, user) {
-          return error ? res.send(error) : res.send(JSON.stringify(user));
+        return User.sign_in(JSON.parse(data), access_token, access_secret, function(error, user) {
+          if (error) {
+            return res.send(error);
+          } else {
+            req.session['user_id'] = user._id;
+            return res.redirect("/home");
+          }
         });
+      });
+    });
+  });
+  app.get('/home', function(req, res) {
+    if (!(req.session.user_id)) {
+      res.redirect('sign_in');
+      return null;
+    }
+    return User.find(req.session.user_id, function(error, current_user) {
+      return error ? res.send(error) : res.render('home.ejs', {
+        locals: {
+          current_user: current_user
+        }
       });
     });
   });

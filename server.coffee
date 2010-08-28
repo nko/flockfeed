@@ -26,7 +26,7 @@ app = express.createServer connect.cookieDecoder(), connect.session(), express.s
 app.set 'view engine', 'ejs'
 
 app.get '/', (req,res)->
-  res.render 'home.ejs'
+  res.render 'splash.ejs'
   
 app.get '/sign_in', (req, res)->
   Twitter.getOAuthRequestToken (error, token, secret, url, params)->
@@ -38,7 +38,10 @@ app.get '/sign_in', (req, res)->
       res.redirect "http://api.twitter.com/oauth/authenticate?oauth_token=#{token}"
 
 app.get '/oauth/callback', (req, res)->
-  sys.puts "Retrieving Access Token..."
+  unless req.session['req.token']
+    res.redirect '/sign_in'
+    return
+    
   Twitter.getOAuthAccessToken req.session['req.token'], req.session['req.secret'], (error, access_token, access_secret, params)->
     if error
       res.send error
@@ -49,10 +52,22 @@ app.get '/oauth/callback', (req, res)->
         res.send error
         return
       sys.puts "Creating user in Mongo..."
-      User.retrieve JSON.parse(data), (error, user)->
+      User.sign_in JSON.parse(data), access_token, access_secret, (error, user)->
         if error
           res.send error
         else
-          res.send JSON.stringify(user)
-    
+          req.session['user_id'] = user._id
+          res.redirect "/home"
+
+app.get '/home', (req,res)->
+  unless req.session.user_id
+    res.redirect 'sign_in'
+    return
+  User.find req.session.user_id,(error,current_user)->
+    if error
+      res.send error
+    else
+      res.render 'home.ejs', locals:
+        current_user:current_user
+  
 app.listen parseInt(process.env.PORT) || 3000

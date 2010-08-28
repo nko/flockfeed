@@ -29,18 +29,35 @@ User =
           else
             callback null, docs[0]
   
-  retrieve:(hash, callback)->
+  find:(id,callback)->
+    User.collection (error,users)->
+      if error
+        callback error
+        return
+      users.findOne _id:id,(error,user)->
+        if error
+          callback error
+        else
+          callback null, user
+  
+  sign_in:(hash, access_token, access_secret, callback)->
     User.collection (error, users)->
-      users.findOne _id:hash.id, (error, existing)->
-        if existing
-          sys.puts 'Existing user found!'
-          callback null, existing
-        else        
-          user = 
-            _id:hash.id
-            key:crypto.createHash('sha1').update("--#{hash.id}-url-hash").digest()
-            screen_name:hash.screen_name
-            name:hash.name
-          User.create user, callback
+      if error
+        callback error
+      else
+        user = 
+          screen_name:hash.screen_name
+          name:hash.name
+          access:
+            token:access_token
+            secret:access_secret
+        users.findOne _id:hash.id, (error, existing)->
+          if existing
+            sys.puts 'Existing user found...'
+            callback null, existing
+          else        
+            user._id = hash.id
+            user.key = crypto.createHash('sha1').update("--#{hash.id}-url-hash").digest('hex')
+            User.create user, callback
         
 exports.User = User
