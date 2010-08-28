@@ -7,13 +7,23 @@
   Server = require('mongodb/connection').Server;
   crypto = require('crypto');
   User = {
-    init: function(host, port) {
-      return (User.db = new DB('small-chip', new Server(host, port, {
+    init: function(host, port, username, password) {
+      return (User.db = new DB(process.env.MONGO_DATABASE || 'flockfeeds', new Server(process.env.MONGO_HOST || 'localhost', process.env.MONGO_PORT || 27017, {
         auto_reconnect: true
       })));
     },
-    collection: function(callback) {
+    open: function(callback) {
+      if (!(User.db)) {
+        User.init();
+      }
       return User.db.open(function() {
+        return process.env.MONGO_USER ? db.authenticate(process.env.MONGO_USERNAME, process.env.MONGO_PASSWORD, function(error, val) {
+          return error ? callback(error) : callback(null, true);
+        }) : callback(null, true);
+      });
+    },
+    collection: function(callback) {
+      return User.open(function() {
         return User.db.collection('users', function(error, users_collection) {
           return error ? callback(error) : callback(null, users_collection);
         });

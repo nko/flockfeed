@@ -7,11 +7,23 @@ Server = require('mongodb/connection').Server
 crypto = require 'crypto'
 
 User = 
-  init:(host, port)->
-    User.db = new DB 'small-chip', new Server(host, port, auto_reconnect:true)
+  init:(host, port, username, password)->
+    User.db = new DB process.env.MONGO_DATABASE || 'flockfeeds', new Server(process.env.MONGO_HOST || 'localhost', process.env.MONGO_PORT || 27017, auto_reconnect:true)
   
-  collection:(callback)->
+  open:(callback)->
+    User.init() unless User.db
     User.db.open ->
+      if process.env.MONGO_USER
+        db.authenticate process.env.MONGO_USERNAME, process.env.MONGO_PASSWORD, (error, val)->
+          if error
+            callback error
+          else
+            callback null, true
+      else
+        callback null, true
+        
+  collection:(callback)->
+    User.open ->
       User.db.collection 'users', (error, users_collection)->
         if error
           callback(error)

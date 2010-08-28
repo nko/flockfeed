@@ -17,7 +17,7 @@
   htmlparser = require('./htmlparser');
   readability = require('./readability');
   User = require('./user').User;
-  User.init('localhost', '27017');
+  User.init(process.env.MONGO_SERVER || 'localhost', process.env.MONGO_PORT || 27017, process.env.MONGO_USERNAME, process.env.MONGO_PASS);
   if (process.env.RACK_ENV === 'production') {
     hoptoad = require('hoptoad-notifier').Hoptoad;
     hoptoad.key = '63da924b138bae57d1066c46accddbe7';
