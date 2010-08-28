@@ -17,7 +17,7 @@ url = require 'url'
 connect = require 'connect'
 express = require 'express'
 ejs = require 'ejs'
-Twitter = new OAuth('http://api.twitter.com/oauth/request_token', 'http://api.twitter.com/oauth/access_token', process.env.TWITTER_KEY, process.env.TWITTER_SECRET, '1.0', null, 'HMAC-SHA1')
+Twitter = require './twitter'
 User = require('./user').User
 
 # Setup Hoptoad Notification
@@ -34,7 +34,7 @@ app.get '/', (req,res)->
   res.render 'splash.ejs'
 
 app.get '/sign_in', (req, res)->
-  Twitter.getOAuthRequestToken (error, token, secret, url, params)->
+  Twitter.consumer.getOAuthRequestToken (error, token, secret, url, params)->
     if error
       res.send error
     else
@@ -47,17 +47,13 @@ app.get '/oauth/callback', (req, res)->
     res.redirect '/sign_in'
     return
 
-  Twitter.getOAuthAccessToken req.session['req.token'], req.session['req.secret'], (error, access_token, access_secret, params)->
-    if error
-      res.send error
-      return
+  Twitter.consumer.getOAuthAccessToken req.session['req.token'], req.session['req.secret'], (error, access_token, access_secret, params)->
+    throw error if error
+    twitter = new Twitter.client(access_token, access_secret)
+    
     sys.puts "Retrieving user info..."
-    Twitter.getProtectedResource 'http://api.twitter.com/1/account/verify_credentials.json', 'GET', access_token, access_secret, (error, data, response)->
-      if error
-        res.send error
-        return
+    twitter.get '/account/verify_credentials', (hash)->
       sys.puts "Creating user in Mongo..."
-      hash = JSON.parse(data)
       User.find().where('id',hash.id).first (user)->
         if user
           sys.puts sys.inspect(user)

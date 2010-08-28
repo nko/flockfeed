@@ -10,7 +10,7 @@
   connect = require('connect');
   express = require('express');
   ejs = require('ejs');
-  Twitter = new OAuth('http://api.twitter.com/oauth/request_token', 'http://api.twitter.com/oauth/access_token', process.env.TWITTER_KEY, process.env.TWITTER_SECRET, '1.0', null, 'HMAC-SHA1');
+  Twitter = require('./twitter');
   User = require('./user').User;
   if (process.env.RACK_ENV === 'production') {
     hoptoad = require('hoptoad-notifier').Hoptoad;
@@ -27,7 +27,7 @@
     return res.render('splash.ejs');
   });
   app.get('/sign_in', function(req, res) {
-    return Twitter.getOAuthRequestToken(function(error, token, secret, url, params) {
+    return Twitter.consumer.getOAuthRequestToken(function(error, token, secret, url, params) {
       if (error) {
         return res.send(error);
       } else {
@@ -42,20 +42,15 @@
       res.redirect('/sign_in');
       return null;
     }
-    return Twitter.getOAuthAccessToken(req.session['req.token'], req.session['req.secret'], function(error, access_token, access_secret, params) {
+    return Twitter.consumer.getOAuthAccessToken(req.session['req.token'], req.session['req.secret'], function(error, access_token, access_secret, params) {
+      var twitter;
       if (error) {
-        res.send(error);
-        return null;
+        throw error;
       }
+      twitter = new Twitter.client(access_token, access_secret);
       sys.puts("Retrieving user info...");
-      return Twitter.getProtectedResource('http://api.twitter.com/1/account/verify_credentials.json', 'GET', access_token, access_secret, function(error, data, response) {
-        var hash;
-        if (error) {
-          res.send(error);
-          return null;
-        }
+      return twitter.get('/account/verify_credentials', function(hash) {
         sys.puts("Creating user in Mongo...");
-        hash = JSON.parse(data);
         return User.find().where('id', hash.id).first(function(user) {
           if (user) {
             sys.puts(sys.inspect(user));
