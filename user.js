@@ -7,7 +7,8 @@
   mongoose.model('User', {
     properties: [
       'id', 'name', 'screen_name', 'key', {
-        access: ['token', 'secret']
+        access: ['token', 'secret'],
+        'last_fetched': 'last_fetched'
       }
     ],
     indexes: ['id', 'key'],
@@ -19,6 +20,25 @@
         return this.find({
           'id': id
         }).first(callback);
+      },
+      fetchOutdated: function(since) {
+        return User.find({
+          'last_fetched': {
+            '$lt': since
+          }
+        }).all(function(users) {
+          var _a, _b, _c, _d, user;
+          _a = []; _c = users;
+          for (_b = 0, _d = _c.length; _b < _d; _b++) {
+            user = _c[_b];
+            _a.push((function() {
+              sys.puts("  " + user.id + " " + user.last_fetched);
+              user.last_fetched = new Date();
+              return user.save;
+            })());
+          }
+          return _a;
+        });
       }
     },
     methods: {
