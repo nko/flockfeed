@@ -14,7 +14,7 @@ Client = (token, secret)->
   this.secret = secret
   
 Client.prototype.request = (method, path, callback)->
-  url = "http://api.twitter.com/1#{path}.json"
+  url = "http://api.twitter.com/1#{path}"
   sys.puts "[Twitter] Fetching #{path}"
   Consumer.getProtectedResource url, method, this.token, this.secret, (error, data, response)->
     if error

@@ -63,8 +63,32 @@
         });
       },
       fetch: function(callback) {
-        return this.client.get('/statuses/home_timeline', function(statuses) {
-          return callback(statuses);
+        var url;
+        url = '/statuses/home_timeline.json?include_entities=true&count=200';
+        if (this.since_id) {
+          url += ("&since_id=" + (this.since_id));
+        }
+        return this.client.get(path, function(statuses) {
+          var _a, _b, _c, _d, _e, _f, _g, _h, link, status;
+          _a = []; _c = statuses;
+          for (_b = 0, _d = _c.length; _b < _d; _b++) {
+            status = _c[_b];
+            _a.push((function() {
+              if (status.entities.urls) {
+                _e = []; _g = status.entities.urls;
+                for (_f = 0, _h = _g.length; _f < _h; _f++) {
+                  url = _g[_f];
+                  _e.push((function() {
+                    sys.puts(("[Link] Creating '" + (url.url) + "' from status '" + (status.id) + "'"));
+                    link = new Link();
+                    return link.populate(status);
+                  })());
+                }
+                return _e;
+              }
+            })());
+          }
+          return _a;
         });
       }
     }

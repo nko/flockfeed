@@ -52,7 +52,7 @@ app.get '/oauth/callback', (req, res)->
     twitter = new Twitter.client(access_token, access_secret)
     
     sys.puts "Retrieving user info..."
-    twitter.get '/account/verify_credentials', (hash)->
+    twitter.get '/account/verify_credentials.json', (hash)->
       sys.puts "Creating user in Mongo..."
       User.find().where('id',hash.id).first (user)->
         if user

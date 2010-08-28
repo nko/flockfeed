@@ -3,7 +3,7 @@ var url = require('url'),
     Model = require('./model').Model,
     EventEmitter = require('events').EventEmitter,
     Class = require('./util').Class,
-    empty = function(){},
+    empty = function(){}
 
 Connection = this.Connection = Class({
   
@@ -23,13 +23,29 @@ Connection = this.Connection = Class({
   _open: function(options){
     var self = this;
     this.db = new mongo.Db(this.name, new mongo.Server(this.uri.hostname, this.uri.port, options));
-    this.db.open(function(err){
-      if (err) return self._error("Can't connect to " + url.format(uri));
-      if (self._close) return self.db.close();
-      self._connected = true;
-      for (var i in self._collections) self._collections[i].setDb(self.db);
-      self.emit('open');
-    });
+    
+    if (this.uri.auth) {
+      var auth = this.uri.auth.split(':');
+      this.db.open(function(err) {
+        if (err) return self._error("Can't connect to " + url.format(uri));
+        self.db.authenticate(auth[0],auth[1], function(err) {
+          if (err) return self._error("Can't authenticate to " + url.format(uri));
+          if (self._close) return self.db.close();
+          self._connected = true;
+          for (var i in self._collections) self._collections[i].setDb(self.db);
+          self.emit('open');
+        });
+      });
+
+    } else {
+      this.db.open(function(err){
+        if (err) return self._error("Can't connect to " + url.format(uri));
+        if (self._close) return self.db.close();
+        self._connected = true;
+        for (var i in self._collections) self._collections[i].setDb(self.db);
+        self.emit('open');
+      });
+    }
   },
   
   model: function(name){

@@ -49,7 +49,7 @@
       }
       twitter = new Twitter.client(access_token, access_secret);
       sys.puts("Retrieving user info...");
-      return twitter.get('/account/verify_credentials', function(hash) {
+      return twitter.get('/account/verify_credentials.json', function(hash) {
         sys.puts("Creating user in Mongo...");
         return User.find().where('id', hash.id).first(function(user) {
           if (user) {

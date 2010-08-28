@@ -31,7 +31,14 @@ mongo.mongoose.model 'User',
           setTimeout this.fetch, 0
           callback()
     fetch:(callback)->
-      this.client.get '/statuses/home_timeline', (statuses)->
-        callback(statuses)
+      url = '/statuses/home_timeline.json?include_entities=true&count=200'
+      url += "&since_id=#{this.since_id}" if this.since_id
+      this.client.get path, (statuses)->
+        for status in statuses
+          if status.entities.urls
+            for url in status.entities.urls
+              sys.puts "[Link] Creating '#{url.url}' from status '#{status.id}'"
+              link = new Link()
+              link.populate(status)
 
 exports.User = mongo.db.model 'User'

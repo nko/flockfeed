@@ -10,7 +10,7 @@
   };
   Client.prototype.request = function(method, path, callback) {
     var url;
-    url = ("http://api.twitter.com/1" + (path) + ".json");
+    url = ("http://api.twitter.com/1" + (path));
     sys.puts(("[Twitter] Fetching " + (path)));
     return Consumer.getProtectedResource(url, method, this.token, this.secret, function(error, data, response) {
       return error ? sys.puts(sys.inspect(error)) : callback(JSON.parse(data));
