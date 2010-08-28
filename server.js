@@ -15,7 +15,9 @@
   process.addListener('uncaughtException', function(error) {
     return hoptoad.notify(error);
   });
-  app = express.createServer(connect.cookieDecoder(), connect.session(), express.staticProvider(__dirname + '/public'));
+  app = express.createServer(connect.cookieDecoder(), connect.session(), express.staticProvider(__dirname + '/public'), express.logger({
+    format: ':method :url [:status] (:response-time ms)'
+  }));
   app.set('view engine', 'ejs');
   app.get('/', function(req, res) {
     return res.render('home.ejs');
@@ -28,9 +30,11 @@
     });
   });
   app.get('/oauth/callback', function(req, res) {
+    sys.puts("Starting OAuth Callback...");
+    sys.puts(JSON.stringify(req.session));
     return Twitter.getOAuthAccessToken(req.session['req.token'], req.session['req.secret'], function(error, access_token, access_secret, params) {
       return Twitter.getProtectedResource('http://api.twitter.com/1/account/verify_credentials.json', 'GET', access_token, access_secret, function(error, data, response) {
-        return res.render(data);
+        return res.send(data);
       });
     });
   });

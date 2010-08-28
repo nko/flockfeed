@@ -17,7 +17,7 @@ hoptoad.key = '63da924b138bae57d1066c46accddbe7'
 process.addListener 'uncaughtException', (error)->
   hoptoad.notify(error)
 
-app = express.createServer connect.cookieDecoder(), connect.session(), express.staticProvider(__dirname + '/public')
+app = express.createServer connect.cookieDecoder(), connect.session(), express.staticProvider(__dirname + '/public'), express.logger({ format: ':method :url [:status] (:response-time ms)' })
 app.set 'view engine', 'ejs'
 
 app.get '/', (req,res)->
@@ -30,8 +30,10 @@ app.get '/sign_in', (req, res)->
     res.redirect "http://api.twitter.com/oauth/authenticate?oauth_token=#{token}"
 
 app.get '/oauth/callback', (req, res)->
+  sys.puts "Starting OAuth Callback..."
+  sys.puts JSON.stringify(req.session)
   Twitter.getOAuthAccessToken req.session['req.token'], req.session['req.secret'], (error, access_token, access_secret, params)->
     Twitter.getProtectedResource 'http://api.twitter.com/1/account/verify_credentials.json', 'GET', access_token, access_secret, (error, data, response)->
-      res.render data
+      res.send data
     
 app.listen parseInt(process.env.PORT) || 3000
