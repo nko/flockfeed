@@ -1,12 +1,10 @@
-exports.parseArticle = function(document) {
+exports.parse = function(document) {
 	var allParagraphs = document.getElementsByTagName("p");
-	var topDivCount = 0;
-	var topDiv = null;
-	var topDivParas;
+	var contentDiv = null;
+	var topDivParas =[];
 	
 	var articleContent = document.createElement("DIV");
 	var articleTitle = document.createElement("H1");
-	var articleFooter = document.createElement("DIV");
 	
 	// Replace all doubled-up <BR> tags with <P> tags, and remove fonts.
 	var pattern =  new RegExp ("<br/?>[ \r\n\s]*<br/?>", "g");
@@ -45,35 +43,25 @@ exports.parseArticle = function(document) {
 
 		// Add points for any commas within this paragraph
 		parentNode.readability.contentScore += getCharCount(allParagraphs[j]);
+
+		topDivParas.push({ 'node': parentNode, 'score': parentNode.readability.contentScore })
 	}
 
-	// Assignment from index for performance. See http://www.peachpit.com/articles/article.aspx?p=31567&seqNum=5 
-	for(nodeIndex = 0; (node = document.getElementsByTagName('*')[nodeIndex]); nodeIndex++)
-		if(typeof node.readability != 'undefined' && (topDiv == null || node.readability.contentScore > topDiv.readability.contentScore))
-			topDiv = node;
+	for (var j=0; j	< topDivParas.length; j++) {
+	  var score = topDivParas[j].score;
+    if (contentDiv == null || score > contentDiv.score) {
+      contentDiv = { 'node': topDivParas[j].node, 'score': score }
+    }
+  }
 
-	if(topDiv == null)
-	{
-	  topDiv = document.createElement('div');
-	  topDiv.innerHTML = 'Sorry, readability was unable to parse this page for content. If you feel like it should have been able to, please <a href="http://code.google.com/p/arc90labs-readability/issues/entry">let us know by submitting an issue.</a>';
-	}
-	
-	// REMOVES ALL STYLESHEETS ...
-	for (var k=0;k < document.styleSheets.length; k++) {
-		if (document.styleSheets[k].href != null && document.styleSheets[k].href.lastIndexOf("readability") == -1) {
-			document.styleSheets[k].disabled = true;
-		}
-	}
+  if (contentDiv == null)
+    return { innerHTML: '' };
 
-	// Remove all style tags in head (not doing this on IE) :
-	var styleTags = document.getElementsByTagName("style");
-	for (var j=0;j < styleTags.length; j++)
-		if (navigator.appName != "Microsoft Internet Explorer")
-			styleTags[j].textContent = "";
+  var topDiv = contentDiv.node
 
 	cleanStyles(topDiv);					// Removes all style attributes
-	topDiv = killDivs(topDiv);				// Goes in and removes DIV's that have more non <p> stuff than <p> stuff
-	topDiv = killBreaks(topDiv);            // Removes any consecutive <br />'s into just one <br /> 
+	topDiv = killDivs(topDiv);		// Goes in and removes DIV's that have more non <p> stuff than <p> stuff
+	topDiv = killBreaks(topDiv);  // Removes any consecutive <br />'s into just one <br /> 
 
 	// Cleans out junk from the topDiv just in case:
 	topDiv = clean(topDiv, "form");
@@ -82,29 +70,15 @@ exports.parseArticle = function(document) {
 	topDiv = clean(topDiv, "h1");
 	topDiv = clean(topDiv, "h2");
 	topDiv = clean(topDiv, "iframe");
-	
-
-	// Add the footer and contents:
-	articleFooter.id = "readFooter";
-	articleFooter.innerHTML = "\
-		<a href='http://www.arc90.com'><img src='http://lab.arc90.com/experiments/readability/images/footer.png'></a>\
-                <div class='footer-right' >\
-                        <span class='version'>Readability version " + readabilityVersion + "</span>\
-		</div>\
-	";
 
 	articleContent.appendChild(topDiv);
-	articleContent.appendChild(articleFooter);
 	
 	return articleContent;
 }
 
 // Get the inner text of a node - cross browser compatibly.
 function getInnerText(e) {
-	if (navigator.appName == "Microsoft Internet Explorer")
-		return e.innerText;
-	else
-		return e.textContent;
+	return e.textContent;
 }
 
 // Get character count
