@@ -1,5 +1,5 @@
 (function() {
-  var OAuth, Twitter, app, connect, ejs, express, hoptoad, sys, url;
+  var OAuth, Twitter, app, connect, ejs, express, hoptoad, htmlparser, http, jsdom, querystring, readability, sys, url;
   require.paths.unshift('./vendor');
   require('express');
   require('oauth');
@@ -10,6 +10,11 @@
   express = require('express');
   ejs = require('ejs');
   Twitter = new OAuth('http://api.twitter.com/oauth/request_token', 'http://api.twitter.com/oauth/access_token', process.env.TWITTER_KEY, process.env.TWITTER_SECRET, '1.0', null, 'HMAC-SHA1');
+  http = require('http');
+  querystring = require('querystring');
+  jsdom = require('jsdom');
+  htmlparser = require('./htmlparser');
+  readability = require('./readability');
   hoptoad = require('hoptoad-notifier').Hoptoad;
   hoptoad.key = '63da924b138bae57d1066c46accddbe7';
   process.addListener('uncaughtException', function(error) {
@@ -26,7 +31,7 @@
     return Twitter.getOAuthRequestToken(function(error, token, secret, url, params) {
       req.session['req.token'] = token;
       req.session['req.secret'] = secret;
-      return res.redirect(("http://api.twitter.com/oauth/authenticate?oauth_token=" + (token)));
+      return res.redirect("http://api.twitter.com/oauth/authenticate?oauth_token=" + (token));
     });
   });
   app.get('/oauth/callback', function(req, res) {
@@ -37,6 +42,38 @@
         return res.send(data);
       });
     });
+  });
+  app.get('/readability', function(req, res) {
+    var headers, httpClient, parsedUrl, request, result;
+    sys.puts("Starting readability");
+    if (typeof (req.param('url')) === 'undefined') {
+      return res.render('home.ejs');
+    } else {
+      parsedUrl = url.parse(req.param('url'));
+      headers = {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en-US; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8'
+      };
+      httpClient = http.createClient(80, parsedUrl.hostname);
+      request = httpClient.request('GET', parsedUrl.pathname + "?" + querystring.stringify(parsedUrl.query), headers);
+      result = "";
+      request.addListener('response', function(response) {
+        response.addListener('data', function(chunk) {
+          return result += chunk;
+        });
+        return response.addListener('end', function() {
+          var content, domWindow, htmlDom;
+          sys.puts("Raw");
+          htmlDom = htmlparser.ParseHtml(result);
+          sys.puts("Parsed HTML");
+          domWindow = jsdom.createWindow(htmlDom);
+          sys.puts("Parsed DOM");
+          content = readability.parseArticle(domWindow.document);
+          sys.puts("Parsed content");
+          return sys.puts(sys.inspect(content.innerHTML, false, null));
+        });
+      });
+      return request.end();
+    }
   });
   app.listen(parseInt(process.env.PORT) || 3000);
 })();
