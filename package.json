@@ -8,6 +8,6 @@
     "mongodb":"",
     "hoptoad-notifier":"",
     "jsdom":"",
-    "mongoose":""
+    "mongoose":">= 0.0.3"
   }
 }
