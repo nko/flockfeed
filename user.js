@@ -1,12 +1,11 @@
 (function() {
-  var Twitter, crypto, db, mongoose, sys;
+  var Twitter, crypto, mongo, sys;
   require.paths.unshift('./vendor');
   sys = require('sys');
   crypto = require('crypto');
   Twitter = require('./twitter');
-  mongoose = require('mongoose').Mongoose;
-  db = mongoose.connect(process.env.MONGO_URL || 'mongodb://localhost:27017/flockfeeds');
-  mongoose.model('User', {
+  mongo = require('./mongo');
+  mongo.mongoose.model('User', {
     properties: [
       'id', 'name', 'screen_name', 'key', {
         access: ['token', 'secret'],
@@ -70,5 +69,5 @@
       }
     }
   });
-  exports.User = db.model('User');
+  exports.User = mongo.db.model('User');
 })();

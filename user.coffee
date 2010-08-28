@@ -3,10 +3,9 @@ require.paths.unshift('./vendor')
 sys = require 'sys'
 crypto = require 'crypto'
 Twitter = require './twitter'
-mongoose = require('mongoose').Mongoose
-db = mongoose.connect process.env.MONGO_URL || 'mongodb://localhost:27017/flockfeeds'
+mongo = require './mongo'
 
-mongoose.model 'User',
+mongo.mongoose.model 'User',
   properties: ['id','name', 'screen_name', 'key', access:['token','secret'], 'last_fetched', 'since_id']
   indexes:['id','key']
   cast:
@@ -35,4 +34,4 @@ mongoose.model 'User',
       this.client.get '/statuses/home_timeline', (statuses)->
         callback(statuses)
 
-exports.User = db.model 'User'
+exports.User = mongo.db.model 'User'
