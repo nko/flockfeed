@@ -25,7 +25,12 @@
     collection: function(callback) {
       return User.open(function() {
         return User.db.collection('users', function(error, users_collection) {
-          return error ? callback(error) : callback(null, users_collection);
+          if (error) {
+            callback(error);
+          } else {
+            callback(null, users_collection);
+          }
+          return User.db.close();
         });
       });
     },

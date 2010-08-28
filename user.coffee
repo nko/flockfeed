@@ -29,6 +29,7 @@ User =
           callback(error)
         else
           callback(null,users_collection)
+        User.db.close()
 
   create:(hash, callback)->
     User.collection (error, users)->
