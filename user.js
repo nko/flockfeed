@@ -1,6 +1,7 @@
 (function() {
-  var crypto, db, mongoose;
+  var crypto, db, mongoose, sys;
   require.paths.unshift('./vendor');
+  sys = require('sys');
   crypto = require('crypto');
   mongoose = require('mongoose').Mongoose;
   db = mongoose.connect(process.env.MONGO_URL || 'mongodb://localhost:27017/flockfeeds');
