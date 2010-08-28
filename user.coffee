@@ -13,7 +13,7 @@ mongoose.model 'User',
     findById:(id, callback)->
       this.find('id':id).first(callback)
     fetchOutdated:(since)->
-      User.find('last_fetched':{'$lt':since}).all (users)->
+      this.find('last_fetched':{'$lt':since}).all (users)->
         for user in users
           sys.puts "  " + user.id + " " + user.last_fetched
           user.last_fetched = new Date()

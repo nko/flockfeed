@@ -60,6 +60,7 @@ app.get '/oauth/callback', (req, res)->
       hash = JSON.parse(data)
       User.find().where('id',hash.id).first (user)->
         if user
+          sys.puts sys.inspect(user)
           sys.puts "Found existing user..."
           req.session.user_id = user.id
           res.redirect '/home'

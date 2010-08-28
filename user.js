@@ -22,7 +22,7 @@
         }).first(callback);
       },
       fetchOutdated: function(since) {
-        return User.find({
+        return this.find({
           'last_fetched': {
             '$lt': since
           }

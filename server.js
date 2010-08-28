@@ -58,6 +58,7 @@
         hash = JSON.parse(data);
         return User.find().where('id', hash.id).first(function(user) {
           if (user) {
+            sys.puts(sys.inspect(user));
             sys.puts("Found existing user...");
             req.session.user_id = user.id;
             return res.redirect('/home');
