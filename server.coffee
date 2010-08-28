@@ -9,7 +9,6 @@ require 'oauth'
 #htmlparser = require './htmlparser'
 #readability = require './readability'
 
-
 crypto = require('crypto')
 sys = require 'sys'
 OAuth = require('oauth').OAuth
@@ -26,6 +25,19 @@ if process.env.RACK_ENV == 'production'
   hoptoad.key = '63da924b138bae57d1066c46accddbe7'
   process.addListener 'uncaughtException', (error)->
     hoptoad.notify(error)
+
+# debugging
+pp = (obj) -> sys.puts sys.inspect(obj)
+
+# helpers
+login_required = (req, res, success_callback) ->
+  pp req.session
+  if req.session['user_id']
+    User.findById parseInt(req.session.user_id), (current_user)->
+      success_callback(current_user)
+  else
+    pp "login_required: redirecting to /"
+    res.redirect '/'
 
 app = express.createServer connect.cookieDecoder(), connect.session(), express.staticProvider(__dirname + '/public'), express.logger({ format: ':method :url [:status] (:response-time ms)' })
 app.set 'view engine', 'ejs'
@@ -50,7 +62,7 @@ app.get '/oauth/callback', (req, res)->
   Twitter.consumer.getOAuthAccessToken req.session['req.token'], req.session['req.secret'], (error, access_token, access_secret, params)->
     throw error if error
     twitter = new Twitter.client(access_token, access_secret)
-    
+
     sys.puts "Retrieving user info..."
     twitter.get '/account/verify_credentials.json', (hash)->
       sys.puts "Creating user in Mongo..."
@@ -74,11 +86,7 @@ app.get '/oauth/callback', (req, res)->
             res.redirect '/home'
 
 app.get '/home', (req,res)->
-  unless req.session.user_id
-    res.redirect 'sign_in'
-    return
-  sys.puts sys.inspect(req.session)
-  User.findById parseInt(req.session.user_id),(current_user)->
+  login_required req, res, (current_user) ->
     res.render 'home.ejs', locals:
       current_user:current_user
 
@@ -112,6 +120,15 @@ app.get '/readability', (req, res)->
         sys.puts "Parsed content"
         sys.puts(sys.inspect(content.innerHTML, false, null));
     request.end();
+
+
+app.get '/feeds/:key', (req, res) ->
+  User.find(key: req.params.key).first (user) ->
+    headers = 'Content-Type': "text/xml"
+    res.render 'rss.ejs',
+      layout: false
+      locals:
+        user: user
 
 
 # periodically fetch user timelines
