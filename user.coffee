@@ -16,9 +16,7 @@ mongo.mongoose.model 'User',
     fetchOutdated:(since)->
       this.find('last_fetched':{'$lt':since}).all (users)->
         for user in users
-          sys.puts "  " + user.id + " " + user.last_fetched
-          user.last_fetched = new Date()
-          user.save
+          user.fetch()
   getters:
     client: ->
       new Twitter.client(this.access.token, this.access.secret)
@@ -31,8 +29,8 @@ mongo.mongoose.model 'User',
           setTimeout this.fetch, 0
           callback()
     fetch:(callback)->
-      url = '/statuses/home_timeline.json?include_entities=true&count=200'
-      url += "&since_id=#{this.since_id}" if this.since_id
+      path = '/statuses/home_timeline.json?include_entities=true&count=200'
+      path += "&since_id=#{this.since_id}" if this.since_id
       this.client.get path, (statuses)->
         for status in statuses
           if status.entities.urls
@@ -40,5 +38,7 @@ mongo.mongoose.model 'User',
               sys.puts "[Link] Creating '#{url.url}' from status '#{status.id}'"
               link = new Link()
               link.populate(status)
+      this.last_fetched = new Date()
+      this.save()
 
 exports.User = mongo.db.model 'User'

@@ -33,11 +33,7 @@
           _a = []; _c = users;
           for (_b = 0, _d = _c.length; _b < _d; _b++) {
             user = _c[_b];
-            _a.push((function() {
-              sys.puts("  " + user.id + " " + user.last_fetched);
-              user.last_fetched = new Date();
-              return user.save;
-            })());
+            _a.push(user.fetch());
           }
           return _a;
         });
@@ -63,13 +59,13 @@
         });
       },
       fetch: function(callback) {
-        var url;
-        url = '/statuses/home_timeline.json?include_entities=true&count=200';
+        var path;
+        path = '/statuses/home_timeline.json?include_entities=true&count=200';
         if (this.since_id) {
-          url += ("&since_id=" + (this.since_id));
+          path += ("&since_id=" + (this.since_id));
         }
-        return this.client.get(path, function(statuses) {
-          var _a, _b, _c, _d, _e, _f, _g, _h, link, status;
+        this.client.get(path, function(statuses) {
+          var _a, _b, _c, _d, _e, _f, _g, _h, link, status, url;
           _a = []; _c = statuses;
           for (_b = 0, _d = _c.length; _b < _d; _b++) {
             status = _c[_b];
@@ -90,6 +86,8 @@
           }
           return _a;
         });
+        this.last_fetched = new Date();
+        return this.save();
       }
     }
   });
