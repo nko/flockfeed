@@ -7,14 +7,16 @@
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
   </head>
   <body>
+    <header id='top'>
+      <h1><a href='/'>FlockFeeds</a></h1>
+    </header>
     <div id='wrapper'>
-      <header id='top'>
-        <h1><a href='/'>FlockFeeds</a></h1>
+      <header id='content_top'>
       </header>
       <div id='content'>
         <%- body %>
       </div>
-      <footer id='bottom'>
+      <footer id='content_bottom'>
         Copyright &copy; 2010 <a href='http://github.com/mbleigh'>Michael Bleigh</a>, <a href='http://github.com/ssoper'>Sean Soper</a>, and <a href='http://github.com/jch'>Jerry Cheung</a>. Built for the <a href='http://nodeknockout.com/teams/flockfeed'>Node Knockout</a>.
       </footer>
     </div>
