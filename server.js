@@ -1,5 +1,5 @@
 (function() {
-  var OAuth, Twitter, User, app, connect, crypto, ejs, express, hoptoad, pollInterval, sys, url;
+  var OAuth, Twitter, User, app, connect, crypto, ejs, express, hoptoad, login_required, pollInterval, pp, sys, url;
   require.paths.unshift('./vendor');
   require('express');
   require('oauth');
@@ -19,6 +19,20 @@
       return hoptoad.notify(error);
     });
   }
+  pp = function(obj) {
+    return sys.puts(sys.inspect(obj));
+  };
+  login_required = function(req, res, success_callback) {
+    pp(req.session);
+    if (req.session['user_id']) {
+      return User.findById(parseInt(req.session.user_id), function(current_user) {
+        return success_callback(current_user);
+      });
+    } else {
+      pp("login_required: redirecting to /");
+      return res.redirect('/');
+    }
+  };
   app = express.createServer(connect.cookieDecoder(), connect.session(), express.staticProvider(__dirname + '/public'), express.logger({
     format: ':method :url [:status] (:response-time ms)'
   }));
@@ -76,12 +90,7 @@
     });
   });
   app.get('/home', function(req, res) {
-    if (!(req.session.user_id)) {
-      res.redirect('sign_in');
-      return null;
-    }
-    sys.puts(sys.inspect(req.session));
-    return User.findById(parseInt(req.session.user_id), function(current_user) {
+    return login_required(req, res, function(current_user) {
       return res.render('home.ejs', {
         locals: {
           current_user: current_user
@@ -120,6 +129,22 @@
       });
       return request.end();
     }
+  });
+  app.get('/feeds/:key', function(req, res) {
+    return User.find({
+      key: req.params.key
+    }).first(function(user) {
+      var headers;
+      headers = {
+        'Content-Type': "text/xml"
+      };
+      return res.render('rss.ejs', {
+        layout: false,
+        locals: {
+          user: user
+        }
+      });
+    });
   });
   pollInterval = 3;
   setInterval(function() {
