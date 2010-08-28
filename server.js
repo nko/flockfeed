@@ -1,11 +1,8 @@
 (function() {
-  var OAuth, Twitter, User, app, connect, crypto, ejs, express, hoptoad, login_required, pollInterval, pp, sys, url;
+  var Twitter, User, app, connect, ejs, express, hoptoad, login_required, pollInterval, pp, sys, url;
   require.paths.unshift('./vendor');
   require('express');
-  require('oauth');
-  crypto = require('crypto');
   sys = require('sys');
-  OAuth = require('oauth').OAuth;
   url = require('url');
   connect = require('connect');
   express = require('express');
