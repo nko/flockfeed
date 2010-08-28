@@ -1,17 +1,8 @@
 require.paths.unshift './vendor'
 
 require 'express'
-require 'oauth'
 
-#http = require 'http'
-#querystring = require 'querystring'
-#jsdom = require 'jsdom'
-#htmlparser = require './htmlparser'
-#readability = require './readability'
-
-crypto = require('crypto')
 sys = require 'sys'
-OAuth = require('oauth').OAuth
 url = require 'url'
 connect = require 'connect'
 express = require 'express'
