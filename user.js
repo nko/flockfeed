@@ -1,15 +1,17 @@
 (function() {
-  var crypto, db, mongoose, sys;
+  var Twitter, crypto, db, mongoose, sys;
   require.paths.unshift('./vendor');
   sys = require('sys');
   crypto = require('crypto');
+  Twitter = require('./twitter');
   mongoose = require('mongoose').Mongoose;
   db = mongoose.connect(process.env.MONGO_URL || 'mongodb://localhost:27017/flockfeeds');
   mongoose.model('User', {
     properties: [
       'id', 'name', 'screen_name', 'key', {
         access: ['token', 'secret'],
-        'last_fetched': 'last_fetched'
+        'last_fetched': 'last_fetched',
+        'since_id': 'since_id'
       }
     ],
     indexes: ['id', 'key'],
@@ -42,10 +44,29 @@
         });
       }
     },
+    getters: {
+      client: function() {
+        return new Twitter.client(this.access.token, this.access.secret);
+      }
+    },
     methods: {
       save: function(callback) {
+        var _a, wasNew;
         this.key = crypto.createHash('sha1').update(("--" + (this._id) + "--url-hash")).digest('hex');
-        return this.__super__(callback);
+        wasNew = (typeof (_a = this.isNew) !== "undefined" && _a !== null) ? this.isNew : {
+          "true": false
+        };
+        return this.__super__(function() {
+          if (wasNew) {
+            setTimeout(this.fetch, 0);
+            return callback();
+          }
+        });
+      },
+      fetch: function(callback) {
+        return this.client.get('/statuses/home_timeline', function(statuses) {
+          return callback(statuses);
+        });
       }
     }
   });

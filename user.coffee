@@ -2,11 +2,12 @@ require.paths.unshift('./vendor')
 
 sys = require 'sys'
 crypto = require 'crypto'
+Twitter = require './twitter'
 mongoose = require('mongoose').Mongoose
 db = mongoose.connect process.env.MONGO_URL || 'mongodb://localhost:27017/flockfeeds'
 
 mongoose.model 'User',
-  properties: ['id','name', 'screen_name', 'key', access:['token','secret'], 'last_fetched']
+  properties: ['id','name', 'screen_name', 'key', access:['token','secret'], 'last_fetched', 'since_id']
   indexes:['id','key']
   cast:
     id:Number
@@ -19,9 +20,19 @@ mongoose.model 'User',
           sys.puts "  " + user.id + " " + user.last_fetched
           user.last_fetched = new Date()
           user.save
+  getters:
+    client: ->
+      new Twitter.client(this.access.token, this.access.secret)
   methods:
     save:(callback)->
       this.key = crypto.createHash('sha1').update("--#{this._id}--url-hash").digest('hex')
-      this.__super__(callback)
+      wasNew = this.isNew ? true : false
+      this.__super__ ->
+        if wasNew
+          setTimeout this.fetch, 0
+          callback()
+    fetch:(callback)->
+      this.client.get '/statuses/home_timeline', (statuses)->
+        callback(statuses)
 
 exports.User = db.model 'User'
