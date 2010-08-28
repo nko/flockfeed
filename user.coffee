@@ -2,11 +2,11 @@ require.paths.unshift('./vendor')
 
 sys = require 'sys'
 crypto = require 'crypto'
-mongoose = require('mongoose').Mongoose
-db = mongoose.connect process.env.MONGO_URL || 'mongodb://localhost:27017/flockfeeds'
+Twitter = require './twitter'
+mongo = require './mongo'
 
-mongoose.model 'User',
-  properties: ['id','name', 'screen_name', 'key', access:['token','secret'], 'last_fetched']
+mongo.mongoose.model 'User',
+  properties: ['id','name', 'screen_name', 'key', access:['token','secret'], 'last_fetched', 'since_id']
   indexes:['id','key']
   cast:
     id:Number
@@ -16,12 +16,29 @@ mongoose.model 'User',
     fetchOutdated:(since)->
       this.find('last_fetched':{'$lt':since}).all (users)->
         for user in users
-          sys.puts "  " + user.id + " " + user.last_fetched
-          user.last_fetched = new Date()
-          user.save
+          user.fetch()
+  getters:
+    client: ->
+      new Twitter.client(this.access.token, this.access.secret)
   methods:
     save:(callback)->
       this.key = crypto.createHash('sha1').update("--#{this._id}--url-hash").digest('hex')
-      this.__super__(callback)
+      wasNew = this.isNew ? true : false
+      this.__super__ ->
+        if wasNew
+          setTimeout this.fetch, 0
+          callback()
+    fetch:(callback)->
+      path = '/statuses/home_timeline.json?include_entities=true&count=200'
+      path += "&since_id=#{this.since_id}" if this.since_id
+      this.client.get path, (statuses)->
+        for status in statuses
+          if status.entities.urls
+            for url in status.entities.urls
+              sys.puts "[Link] Creating '#{url.url}' from status '#{status.id}'"
+              link = new Link()
+              link.populate(status)
+      this.last_fetched = new Date()
+      this.save()
 
-exports.User = db.model 'User'
+exports.User = mongo.db.model 'User'
