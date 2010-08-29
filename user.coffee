@@ -6,7 +6,7 @@ crypto = require 'crypto'
 Twitter = require './twitter'
 mongo = require './mongo'
 Link = require('./link').Link
-chain = require('chain-gang').create
+chain = require('./vendor/.npm/chain-gang/active/package/lib').create({ workers: (parseInt(process.env.WORKERS) || 5) })
 
 mongo.mongoose.model 'User',
   properties: ['last_fetched', 'since_id','id','name', 'screen_name', 'key', access:['token','secret']]
@@ -37,11 +37,10 @@ mongo.mongoose.model 'User',
     links:(callback)->
       Link.find().where('user_id',this.id).sort([['status.created_at',-1]]).all (arr)->  
         callback(arr)
-    job: (timeout, url) ->
+    job: (timeout, link) ->
       (worker) ->
-        Link.findOne().where('user_id', this.id).where('url', url) (link)->
-          link.fetchContent ->
-            worker.finish()
+        link.fetchContent ->
+          worker.finish()
     fetch:(callback)->
       if this.since_id
         count = 200
@@ -62,9 +61,8 @@ mongo.mongoose.model 'User',
               Logger.debug "Link", "Creating '#{url.url}' from status '#{status.id}'"
               links = Link.fromStatus(self,status)
               for link in links
-                chain.add job('5', link.url)
-                #link.fetchContent()
-                #Link.fetchContent(link)
+                Logger.debug "User", "Adding job to retrieve url #{link.url}"
+                chain.add self.job("#{parseInt(process.env.WORKER_TIMEOUT) || 10}", link), "#{link._id}"
                 return
 
 exports.User = mongo.db.model 'User'

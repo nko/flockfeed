@@ -14,8 +14,6 @@ REST = require('./rest').Client
 Readability = require('./readability').Client
 hoptoad = require('hoptoad-notifier').Hoptoad
     
-chainGang = require './vendor/.npm/chain-gang/active/package/lib'
-
 # Setup Hoptoad Notification
 
 # debugging
@@ -113,7 +111,7 @@ app.get '/readability', (req, res)->
   REST.get req.param('url'), (response)->
     Readability.parse response.body, (result)->
       res.render 'readability.ejs', locals:
-        { content: result.innerHTML, url: req.param('url') }      
+        { content: result.content, url: req.param('url') }
 
 app.get '/feeds/:key', (req, res) ->
   User.find(key:req.params.key).first (user)->

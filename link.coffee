@@ -26,45 +26,18 @@ mongo.mongoose.model 'Link',
           l.save
           links.push l
       links
-    fetchContent:(link, redirects)->
-      self = this
-      try
-        redirects = redirects || 0
-        REST.get link.url,(response)->
-          if response.status >= 200 && response.status < 300
-            title_match = response.body.match /<title>(.*)<\/title>/mi
-            if title_match
-              link.title = title_match[1].replace(/^\s+|\s+$/g, '')
-              Logger.debug "Link", "Title fetched successfully. (#{link.title})"
-              Readability.parse response.body, (result)->
-                Logger.debug "Link", "Content parsed successfully. (#{link.title} - #{link.url})"
-                link.content = result.innerHTML
-                link.save()
-
-          # Follow redirects to their source!
-          else if [300,301,302,303,305,307].indexOf(response.status) != -1 and redirects <= 3
-            location = response.headers['Location'] || response.headers['location']
-            Logger.debug "Link", "#{link.url} is a redirect, following to #{location}"
-            link.url = location
-            redirects += 1
-            link.save ->
-              self(link, redirects)
-      catch error
-        Logger.warn "Link", "#{link.url} could not be fetched."
   methods:
     fetchContent:->
       try
         self = this
         REST.get this.url,(response)->
           if response.status >= 200 && response.status < 300
-            title_match = response.body.match /<title>(.*)<\/title>/mi
-            if title_match
-              self.title = title_match[1].replace(/^\s+|\s+$/g, '')
-              Logger.debug "Link", "Title fetched successfully. (#{self.title})"
-              Readability.parse response.body, (result)->
-                Logger.debug "Link", "Content parsed successfully. (#{self.title})"
-                self.content = result.innerHTML
-                self.save()
+            Logger.debug "Link", "Fetched successfully (#{self.url})"
+            Readability.parse response.body, (result)->
+              self.content = result.content
+              self.title = result.title
+              Logger.debug "Link", "Content parsed successfully. (#{self.title})"
+              self.save()
 
           # Follow redirects to their source!
           else if [300,301,302,303,305,307].indexOf(response.status) != -1 and self.redirects <= 3

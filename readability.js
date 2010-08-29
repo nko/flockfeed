@@ -25,11 +25,10 @@
     	var topDivParas =[];
 
     	var articleContent = document.createElement("DIV");
-    	var articleTitle = document.createElement("H1");
+    	var articleTitle = document.title
 
-    	// Grab the title from the <title> tag and inject it as the title.
-    	articleTitle.innerHTML = document.title;
-    	articleContent.appendChild(articleTitle);
+    	if (articleTitle)
+    	  articleTitle = articleTitle.replace(/^\s+|\s+$/g, '');
 
     	// Study all the paragraphs and find the chunk that has the best score.
     	// A score is determined by things like: Number of <p>'s, commas, special classes, etc.
@@ -74,7 +73,7 @@
       }
 
       if (contentDiv == null)
-        return callback({ innerHTML: '' });
+        return callback({ content: '', title: '' });
 
       var topDiv = contentDiv.node
 
@@ -92,7 +91,7 @@
 
     	articleContent.appendChild(topDiv);
 
-    	return callback(articleContent);
+    	return callback({ content: articleContent.innerHTML, title: articleTitle });
     },
     getInnerText: function(e) {
     	return e.textContent;
