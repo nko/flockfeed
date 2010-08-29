@@ -36,10 +36,11 @@ mongo.mongoose.model 'Link',
             if title_match
               self.title = title_match[1].replace(/^\s+|\s+$/g, '')
               Logger.debug "Link", "Title fetched successfully. (#{self.title})"
+              Readability.parse response.body, (result)->
+                Logger.debug "[Link] Content parsed successfully. (#{self.title})"
+                self.content = result
               self.save()
-            Readability.parse response.body, (result)->
-              sys.puts "[Link] Content parsed successfully. (#{self.title})"
-              self.content = result
+
           # Follow redirects to their source!
           else if [300,301,302,303,305,307].indexOf(response.status) != -1 and self.redirects <= 3
             location = response.headers['Location'] || response.headers['location']
