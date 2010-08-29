@@ -18,7 +18,15 @@ Client =
       response.on 'data',(chunk)->
         res.body += chunk
       response.on 'end',->
-        callback res
+        content_type = res.headers['Content-Type'] || res.headers['content-type']
+        if content_type.indexOf('image') > 0
+          res.body = "<body><p><img src='#{res.body}'></p></body>"
+          callback res
+        else if content_type == 'text/html'
+          callback res
+        else
+          return
+
   get:(url,callback)->
     this.request 'GET', url, callback
     

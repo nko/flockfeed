@@ -51,7 +51,7 @@ mongo.mongoose.model 'User',
       path += "&since_id=#{this.since_id}" if this.since_id
       self = this
       this.client.get path, (statuses)->
-        Logger.debug "asdf", "#{statuses.length}"
+        Logger.debug "User", "#{statuses.length} statuses to parse"
         self.last_fetched = new Date()
         if statuses[0]
           self.since_id = statuses[0].id
