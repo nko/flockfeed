@@ -56,7 +56,7 @@
         return this.__super__(callback);
       },
       links: function(callback) {
-        return Link.find().where('user_id', this.id).all(function(arr) {
+        return Link.find().where('user_id', this.id).sort('status.created_at', -1).all(function(arr) {
           return callback(arr);
         });
       },

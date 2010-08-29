@@ -120,7 +120,6 @@
     return User.find({
       key: req.params.key
     }).first(function(user) {
-      sys.puts(user.links);
       return user.links(function(linkies) {
         sys.puts(sys.inspect(linkies));
         res.header('Content-Type', 'application/atom+xml');

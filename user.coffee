@@ -29,7 +29,7 @@ mongo.mongoose.model 'User',
       this.key = crypto.createHash('sha1').update("--#{this._id}--url-hash").digest('hex')
       this.__super__ callback
     links:(callback)->
-      Link.find().where('user_id',this.id).all (arr)->  
+      Link.find().where('user_id',this.id).sort('status.created_at',-1).all (arr)->  
         callback(arr)
     fetch:(callback)->
       path = '/statuses/home_timeline.json?include_entities=true&count=200'

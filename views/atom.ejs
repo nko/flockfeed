@@ -13,10 +13,12 @@
   <% for (i in links) { %>
   <entry> 
      <id>urn:uuid:<%= links[i].status.id %></id>
-     <title><%= links[i].title %></title> 
+     <title><%= links[i].title || links[i].status.text %></title> 
      <link href='<%= links[i].url %>' type='text/html'/>
      <updated><%= links[i].status.created_at %></updated>
-     <summary><%= links[i].status.text %></summary>
+     <content>
+      <%= "<div style='padding: 10px; min-height: 24px; background: #def;'><img src='http://img.tweetimag.es/i/" + links[i].status.user.screen_name + "_m' style='float: left; margin-right: 10px;'/> <b>" + links[i].status.user.screen_name + ":</b>_<span>" + links[i].status.text + "</span></div>" %>
+      </content>
   </entry> 
   <% } %>
 </feed>

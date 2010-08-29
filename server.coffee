@@ -97,7 +97,6 @@ app.get '/readability', (req, res)->
 
 app.get '/feeds/:key', (req, res) ->
   User.find(key: req.params.key).first (user)->
-    sys.puts user.links
     user.links (linkies)->
       sys.puts sys.inspect(linkies)
       res.header 'Content-Type', 'application/atom+xml'      
