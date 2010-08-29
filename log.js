@@ -10,6 +10,13 @@
         'created_at': -1
       }
     ],
+    getters: {
+      xmlDate: function() {
+        var d;
+        d = new Date(Date.parse(this.created_at));
+        return "" + (d.getUTCFullYear()) + "-" + (d.getUTCMonth()) + "-" + (d.getUTCDate()) + "T" + (d.getUTCHours()) + ":" + (d.getUTCMinutes()) + ":" + (d.getUTCSeconds());
+      }
+    },
     static: {
       log: function(level, category, message, payload, fn) {
         var l;

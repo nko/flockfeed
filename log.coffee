@@ -6,6 +6,10 @@ sys = require 'sys'
 mongo.mongoose.model 'Log',
   properties:['created_at','level','category','message','payload']
   indexes:['category','level',{'created_at':-1}]
+  getters:
+    xmlDate:->
+      d = new Date(Date.parse(this.created_at))
+      "#{d.getUTCFullYear()}-#{d.getUTCMonth()}-#{d.getUTCDate()}T#{d.getUTCHours()}:#{d.getUTCMinutes()}:#{d.getUTCSeconds()}"
   static:
     log:(level,category,message,payload,fn)->
       unless process.env.RACK_ENV == 'production'

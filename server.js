@@ -31,8 +31,11 @@
   }));
   app.set('view engine', 'ejs');
   if (process.env.RACK_ENV === 'production') {
+    hoptoad.key = '63da924b138bae57d1066c46accddbe7';
+    process.addListener('uncaughtException', function(error) {
+      return hoptoad.notify(error);
+    });
     app.error(function(err, req, res, next) {
-      hoptoad.key = '63da924b138bae57d1066c46accddbe7';
       hoptoad.notify(err);
       res.header('Content-Type', 'text/html');
       return res.render('error.ejs', {
