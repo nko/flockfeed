@@ -51,6 +51,7 @@ mongo.mongoose.model 'User',
       path += "&since_id=#{this.since_id}" if this.since_id
       self = this
       this.client.get path, (statuses)->
+        Logger.debug "asdf", "#{statuses.length}"
         self.last_fetched = new Date()
         if statuses[0]
           self.since_id = statuses[0].id
@@ -63,6 +64,5 @@ mongo.mongoose.model 'User',
               for link in links
                 Logger.debug "User", "Adding job to retrieve url #{link.url}"
                 chain.add self.job("#{parseInt(process.env.WORKER_TIMEOUT) || 10}", link), "#{link._id}"
-                return
 
 exports.User = mongo.db.model 'User'
