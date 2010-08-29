@@ -1,5 +1,5 @@
 (function() {
-  var Twitter, User, app, connect, ejs, express, hoptoad, htmlparser, http, jsdom, login_required, pollInterval, pp, querystring, readability, sys, url;
+  var REST, Twitter, User, app, connect, ejs, express, hoptoad, htmlparser, jsdom, login_required, pollInterval, pp, readability, sys, url;
   require.paths.unshift('./vendor');
   require('express');
   sys = require('sys');
@@ -9,8 +9,7 @@
   ejs = require('ejs');
   Twitter = require('./twitter');
   User = require('./user').User;
-  http = require('http');
-  querystring = require('querystring');
+  REST = require('./rest').Client;
   jsdom = require('jsdom');
   htmlparser = require('./htmlparser');
   readability = require('./readability');
@@ -101,47 +100,33 @@
     });
   });
   app.get('/readability', function(req, res) {
-    var headers, httpClient, parsedUrl, request, result;
     if (typeof (req.param('url')) === 'undefined') {
       res.redirect('home');
       return null;
     }
-    parsedUrl = url.parse(req.param('url'));
-    headers = {
-      'User-Agent': 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en-US; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8'
-    };
-    httpClient = http.createClient(80, parsedUrl.hostname);
-    request = httpClient.request('GET', parsedUrl.pathname + "?" + querystring.stringify(parsedUrl.query), headers);
-    result = "";
-    request.addListener('response', function(response) {
-      response.addListener('data', function(chunk) {
-        return result += chunk;
-      });
-      return response.addListener('end', function() {
-        var content, doc, level, window;
-        level = jsdom.defaultLevel;
-        doc = new (level.Document)();
-        doc.createWindow = function() {
-          var window;
-          window = jsdom.windowAugmentation(level, {
-            document: doc,
-            parser: htmlparser
-          });
-          delete window.document.createWindow;
-          return window;
-        };
-        window = doc.createWindow();
-        window.document.innerHTML = result;
-        content = readability.parse(window.document);
-        return res.render('readability.ejs', {
-          locals: {
-            content: content.innerHTML,
-            url: req.param('url')
-          }
+    return REST.get(req.param('url'), function(response) {
+      var content, doc, level, window;
+      level = jsdom.defaultLevel;
+      doc = new (level.Document)();
+      doc.createWindow = function() {
+        var window;
+        window = jsdom.windowAugmentation(level, {
+          document: doc,
+          parser: htmlparser
         });
+        delete window.document.createWindow;
+        return window;
+      };
+      window = doc.createWindow();
+      window.document.innerHTML = response.body;
+      content = readability.parse(window.document, true);
+      return res.render('readability.ejs', {
+        locals: {
+          content: content.innerHTML,
+          url: req.param('url')
+        }
       });
     });
-    return request.end();
   });
   app.get('/feeds/:key', function(req, res) {
     return User.find({

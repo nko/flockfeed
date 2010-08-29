@@ -1114,9 +1114,13 @@ core.Document.prototype = {
 
   /* returns Attr */
   createAttribute: function(/* string */ name) {
+    /*
+    Seems to be doing more harm than good (sts, 8/28/10)
+
     if (!name || !name.length || name.match(/[^\w:\d_\.-]+/) ) {
       throw new core.DOMException(INVALID_CHARACTER_ERR);
     }
+    */
     return new core.Attr(this, name,false);
   }, // raises: function(DOMException) {},
 
