@@ -6,6 +6,7 @@ Logger = require('./log').Logger
 Twitter = require './twitter'
 mongo = require('./mongo')
 Readability = require('./readability').Client
+Content = require('./content').Content
 
 mongo.mongoose.model 'Link',
   properties: ['url','redirects','title','user_id', 'content', {'status':['id','text',{'user':['screen_name','name']},'created_at']}]
@@ -32,13 +33,13 @@ mongo.mongoose.model 'Link',
         self = this
         REST.get this.url,(response)->
           if response.status >= 200 && response.status < 300
-            title_match = response.body.match /<title>(.*)<\/title>/mi
+            title_match = response.body.match /(.*)<\/title>/mi
             if title_match
               self.title = title_match[1].replace(/^\s+|\s+$/g, '')
               Logger.debug "Link", "Title fetched successfully. (#{self.title})"
-              Readability.parse response.body, (result)->
-                Logger.debug "Link", "Content parsed successfully. (#{self.title})"
-                self.content = result.innerHTML
+              
+              Content.for self, response.body, (html)->
+                self.content = html
                 self.save()
 
           # Follow redirects to their source!

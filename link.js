@@ -1,5 +1,5 @@
 (function() {
-  var Logger, REST, Readability, Twitter, mongo, sys;
+  var Content, Logger, REST, Readability, Twitter, mongo, sys;
   require.paths.unshift('./vendor');
   REST = require('./rest').Client;
   sys = require('sys');
@@ -7,6 +7,7 @@
   Twitter = require('./twitter');
   mongo = require('./mongo');
   Readability = require('./readability').Client;
+  Content = require('./content').Content;
   mongo.mongoose.model('Link', {
     properties: [
       'url', 'redirects', 'title', 'user_id', 'content', {
@@ -53,13 +54,12 @@
           return REST.get(this.url, function(response) {
             var location, title_match;
             if (response.status >= 200 && response.status < 300) {
-              title_match = response.body.match(/<title>(.*)<\/title>/mi);
+              title_match = response.body.match(/(.*)<\/title>/mi);
               if (title_match) {
                 self.title = title_match[1].replace(/^\s+|\s+$/g, '');
                 Logger.debug("Link", ("Title fetched successfully. (" + (self.title) + ")"));
-                return Readability.parse(response.body, function(result) {
-                  Logger.debug("Link", ("Content parsed successfully. (" + (self.title) + ")"));
-                  self.content = result.innerHTML;
+                return Content["for"](self, response.body, function(html) {
+                  self.content = html;
                   return self.save();
                 });
               }

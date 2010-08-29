@@ -104,16 +104,18 @@ app.get '/home', (req,res)->
     res.render 'home.ejs', 
       locals:
         current_user:current_user
-        
+    
+Content = require('./content').Content
 app.get '/readability', (req, res)->
   if typeof(req.param('url')) == 'undefined'
     res.redirect 'home'
     return
 
   REST.get req.param('url'), (response)->
-    Readability.parse response.body, (result)->
+    Content.for {url:req.param('url')}, response.body, (content)->
       res.render 'readability.ejs', locals:
-        { content: result.innerHTML, url: req.param('url') }      
+        content: content
+        url: req.param('url')
 
 app.get '/feeds/:key', (req, res) ->
   User.find(key:req.params.key).first (user)->

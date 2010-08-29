@@ -1,0 +1,56 @@
+(function() {
+  var Content, Logger, Readability, YouTube, sys;
+  require.paths.unshift('./vendor');
+  sys = require('sys');
+  Logger = require('./log').Logger;
+  Readability = require('./readability').Client;
+  Content = {
+    domains: [],
+    handlers: {},
+    addHandler: function(domain, handler) {
+      Content.domains.push(domain);
+      return (Content.handlers[domain] = handler);
+    },
+    "for": function(link, body, fn) {
+      var _a, _b, _c, domain, match, self;
+      self = this;
+      _b = Content.domains;
+      for (_a = 0, _c = _b.length; _a < _c; _a++) {
+        domain = _b[_a];
+        match = domain.exec(link.url);
+        sys.puts(sys.inspect(domain));
+        if (match) {
+          Logger.debug("Content", ("Matched " + (domain)));
+          return fn(Content.handlers[domain].call(link, match));
+        }
+      }
+      return Readability.parse(body, function(result) {
+        if (result) {
+          Logger.debug("Link", ("Content parsed successfully. (" + (self.url) + ")"));
+          return fn(result.innerHTML);
+        } else {
+          Logger.debug("Link", ("Could not parse content of " + (self.url)));
+          return fn("");
+        }
+      });
+    }
+  };
+  Content.addHandler(/youtube\.com\/watch.*[?&]v=([^&]+)/i, function(match) {
+    return YouTube.player(match[1]);
+  });
+  Content.addHandler(/youtu\.be\/(.*)\??/i, function(match) {
+    return YouTube.player(match[1]);
+  });
+  Content.addHandler(/twitpic\.com\/(.*)\??/i, function(match) {
+    return "<p><a href='" + (this.url) + "'><img src='http://twitpic.com/show/large/" + (match[1]) + "'/></a></p>";
+  });
+  Content.addHandler(/twitter\/.com\/.*\/statuses\/([0-9]+)/i, function(match) {
+    return "<p><a href='" + (this.url) + "'><img src='http://twictur.es/i/" + (match[1]) + "'/></a></p>";
+  });
+  YouTube = {
+    player: function(youtube_id) {
+      return "<p><object width='480' height='385'><param name='movie' value='http://www.youtube.com/v/" + (youtube_id) + "?fs=1&amp;hl=en_US'></param><param name='allowFullScreen' value='true'></param><param name='allowscriptaccess' value='always'></param><embed src='http://www.youtube.com/v/" + (youtube_id) + "?fs=1&amp;hl=en_US' type='application/x-shockwave-flash' allowscriptaccess='always' allowfullscreen='true' width='480' height='385'></embed></object></p>";
+    }
+  };
+  exports.Content = Content;
+})();
