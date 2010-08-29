@@ -37,7 +37,7 @@ mongo.mongoose.model 'Log',
       q.where('level',level) if level
       q.where('category',category) if category
       q.limit(100)
-      q.sort('created_at',-1)
+      q.sort({'$natural':-1})
       q.all (logs)->
         fn(logs)
     

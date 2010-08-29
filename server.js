@@ -12,13 +12,7 @@
   User = require('./user').User;
   REST = require('./rest').Client;
   Readability = require('./readability').Client;
-  if (process.env.RACK_ENV === 'production') {
-    hoptoad = require('hoptoad-notifier').Hoptoad;
-    hoptoad.key = '63da924b138bae57d1066c46accddbe7';
-    process.addListener('uncaughtException', function(error) {
-      return hoptoad.notify(error);
-    });
-  }
+  hoptoad = require('hoptoad-notifier').Hoptoad;
   pp = function(obj) {
     return sys.puts(sys.inspect(obj));
   };
@@ -36,6 +30,15 @@
     format: ':method :url [:status] (:response-time ms)'
   }));
   app.set('view engine', 'ejs');
+  app.error(function(err, req, res, next) {
+    if (process.env.RACK_ENV === 'production') {
+      hoptoad.key = '63da924b138bae57d1066c46accddbe7';
+      hoptoad.notify(err);
+    }
+    return res.render('error.ejs', {
+      status: 500
+    });
+  });
   app.get('/', function(req, res) {
     return res.render('splash.ejs');
   });

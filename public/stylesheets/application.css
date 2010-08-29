@@ -309,3 +309,29 @@ body.announcement {
     display: block; }
   body.announcement #nko_vote {
     margin-top: 30px; }
+
+#failwhale {
+  border: 10px solid white;
+  border-bottom-width: 40px;
+  -moz-box-shadow: 2px 2px 15px rgba(0, 0, 0, 0.2);
+  -webkit-box-shadow: 2px 2px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 2px 2px 15px rgba(0, 0, 0, 0.2);
+  filter: "progid:DXImageTransform.Microsoft.dropshadow(OffX=2px, OffY=2px, Color='rgba(0, 0, 0, 0.2)')";
+  -ms-filter: "\"progid:DXImageTransform.Microsoft.dropshadow(OffX=2px, OffY=2px, Color='rgba(0, 0, 0, 0.2)')\"";
+  margin: 25px;
+  -moz-transform: rotate(-5deg);
+  -o-transform: rotate(-5);
+  -webkit-transform: rotate(-5deg);
+  filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=-0.014);
+  -ms-filter: "progid:DXImageTransform.Microsoft.BasicImage(rotation=-0.014)"; }
+
+.error .message {
+  background-color: #bbbbbb;
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#cccccc), to(#aaaaaa));
+  background-image: -moz-linear-gradient(top, #cccccc, #aaaaaa);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#cccccc', endColorstr='#aaaaaa');
+  -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#cccccc', endColorstr='#aaaaaa')";
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  border-radius: 10px;
+  padding: 20px; }

@@ -55,7 +55,9 @@
           q.where('category', category);
         }
         q.limit(100);
-        q.sort('created_at', -1);
+        q.sort({
+          '$natural': -1
+        });
         return q.all(function(logs) {
           return fn(logs);
         });
