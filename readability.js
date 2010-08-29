@@ -1,5 +1,6 @@
 (function() {
   require.paths.unshift('./vendor');
+  var sys = require('sys');
   var jsdom = require('jsdom');
   var htmlparser = require('./htmlparser');
   var level = jsdom.defaultLevel;
@@ -14,31 +15,35 @@
   var Client = {
     parse: function(content, callback) {
       document.innerHTML = content;
-      
+
     	var allParagraphs = document.getElementsByTagName("p");
     	var contentDiv = null;
     	var topDivParas =[];
-	
+
     	var articleContent = document.createElement("DIV");
     	var articleTitle = document.createElement("H1");
-	
+
     	// Replace all doubled-up <BR> tags with <P> tags, and remove fonts.
     	var pattern =  new RegExp ("<br/?>[ \r\n\s]*<br/?>", "g");
     	document.body.innerHTML = document.body.innerHTML.replace(pattern, "</p><p>").replace(/<\/?font[^>]*>/g, '');
-	
+
     	// Grab the title from the <title> tag and inject it as the title.
     	articleTitle.innerHTML = document.title;
     	articleContent.appendChild(articleTitle);
-	
+
     	// Study all the paragraphs and find the chunk that has the best score.
     	// A score is determined by things like: Number of <p>'s, commas, special classes, etc.
     	for (var j=0; j	< allParagraphs.length; j++) {
     		parentNode = allParagraphs[j].parentNode;
 
+        if(parentNode == null) {
+          continue;
+        }
+
     		// Initialize readability data
     		if(typeof parentNode.readability == 'undefined')
     		{
-    			parentNode.readability = {"contentScore": 0};			
+    			parentNode.readability = {"contentScore": 0};
 
     			// Look for a special classname
     			if(parentNode.className.match(/(comment|meta|footer|footnote)/))
@@ -71,13 +76,13 @@
       }
 
       if (contentDiv == null)
-        return { innerHTML: '' };
+        return callback({ innerHTML: '' });
 
       var topDiv = contentDiv.node
 
     	this.cleanStyles(topDiv);					// Removes all style attributes
     	topDiv = this.killDivs(topDiv);		// Goes in and removes DIV's that have more non <p> stuff than <p> stuff
-    	topDiv = this.killBreaks(topDiv);  // Removes any consecutive <br />'s into just one <br /> 
+    	topDiv = this.killBreaks(topDiv);  // Removes any consecutive <br />'s into just one <br />
 
     	// Cleans out junk from the topDiv just in case:
     	topDiv = this.clean(topDiv, "form");
@@ -88,7 +93,7 @@
     	topDiv = this.clean(topDiv, "iframe");
 
     	articleContent.appendChild(topDiv);
-	
+
     	return callback(articleContent);
     },
     getInnerText: function(e) {
@@ -135,7 +140,7 @@
 
       // If the number of commas is less than 10 (bad sign) ...
       if ( this.getCharCount(divsList[i]) < 10) {
-      		// And the number of non-paragraph elements is more than paragraphs 
+      		// And the number of non-paragraph elements is more than paragraphs
       		// or other ominous signs :
       		if ( img > p || li > p || a > p || p == 0 || embed > 0) {
       			divsList[i].parentNode.removeChild(divsList[i]);
