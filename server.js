@@ -1,5 +1,5 @@
 (function() {
-  var Content, Logger, REST, Readability, Twitter, User, app, chainGang, connect, ejs, express, hoptoad, login_required, pollInterval, pp, sys, url, work;
+  var Content, Logger, REST, Readability, Twitter, User, app, connect, ejs, express, hoptoad, login_required, pollInterval, pp, sys, url, work;
   require.paths.unshift('./vendor');
   require('express');
   sys = require('sys');
@@ -13,7 +13,6 @@
   REST = require('./rest').Client;
   Readability = require('./readability').Client;
   hoptoad = require('hoptoad-notifier').Hoptoad;
-  chainGang = require('./vendor/.npm/chain-gang/active/package/lib');
   pp = function(obj) {
     return sys.puts(sys.inspect(obj));
   };
@@ -132,10 +131,10 @@
     return REST.get(req.param('url'), function(response) {
       return Content["for"]({
         url: req.param('url')
-      }, response.body, function(content) {
+      }, response.body, function(result) {
         return res.render('readability.ejs', {
           locals: {
-            content: content,
+            content: result.content,
             url: req.param('url')
           }
         });
@@ -171,7 +170,7 @@
       });
     });
   });
-  pollInterval = 30;
+  pollInterval = parseInt(process.env.POLL_INTERVAL) || 60;
   work = function() {
     return process.nextTick(function() {
       var since;

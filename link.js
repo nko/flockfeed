@@ -52,17 +52,15 @@
         try {
           self = this;
           return REST.get(this.url, function(response) {
-            var location, title_match;
+            var location;
             if (response.status >= 200 && response.status < 300) {
-              title_match = response.body.match(/<title>\s*(.*)\s*<\/title>/mi);
-              if (title_match) {
-                self.title = title_match[1].replace(/^\s+|\s+$/g, '');
-                Logger.debug("Link", ("Title fetched successfully. (" + (self.title) + ")"));
-                return Content["for"](self, response.body, function(html) {
-                  self.content = html;
-                  return self.save();
-                });
-              }
+              Logger.debug("Link", ("Fetched successfully (" + (self.url) + ")"));
+              return Content["for"](self, response.body, function(result) {
+                self.content = result.content;
+                self.title = result.title;
+                Logger.debug("Link", ("Content parsed successfully. (" + (self.title) + ")"));
+                return self.save();
+              });
             } else if ([300, 301, 302, 303, 305, 307].indexOf(response.status) !== -1 && self.redirects <= 3) {
               location = response.headers['Location'] || response.headers['location'];
               Logger.debug("Link", ("" + (self.url) + " is a redirect, following to " + (location)));

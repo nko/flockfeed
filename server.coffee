@@ -136,7 +136,7 @@ app.get '/admin/logs', (req, res)->
         logs:logs
 
 # periodically fetch user timelines
-pollInterval = 30 # seconds
+pollInterval = parseInt(process.env.POLL_INTERVAL) || 60 # seconds
 work = ->
   process.nextTick ->
     try

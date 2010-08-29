@@ -25,10 +25,13 @@
       return Readability.parse(body, function(result) {
         if (result) {
           Logger.debug("Link", ("Content parsed successfully. (" + (link.url) + ")"));
-          return fn(result.innerHTML);
+          return fn(result);
         } else {
           Logger.debug("Link", ("Could not parse content of " + (link.url)));
-          return fn("");
+          return fn({
+            content: '',
+            title: ''
+          });
         }
       });
     }
