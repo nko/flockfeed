@@ -57,12 +57,12 @@
               if (title_match) {
                 self.title = title_match[1].replace(/^\s+|\s+$/g, '');
                 Logger.debug("Link", "Title fetched successfully. (" + (self.title) + ")");
-                self.save();
+                Readability.parse(response.body, function(result) {
+                  Logger.debug("[Link] Content parsed successfully. (" + (self.title) + ")");
+                  return (self.content = result);
+                });
+                return self.save();
               }
-              return Readability.parse(response.body, function(result) {
-                sys.puts("[Link] Content parsed successfully. (" + (self.title) + ")");
-                return (self.content = result);
-              });
             } else if ([300, 301, 302, 303, 305, 307].indexOf(response.status) !== -1 && (self.redirects <= 3)) {
               location = response.headers['Location'] || response.headers['location'];
               Logger.debug("Link", "" + (self.url) + " is a redirect, following to " + (location));
