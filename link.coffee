@@ -38,7 +38,7 @@ mongo.mongoose.model 'Link',
               Logger.debug "Link", "Title fetched successfully. (#{self.title})"
               Readability.parse response.body, (result)->
                 Logger.debug "Link", "Content parsed successfully. (#{self.title})"
-                self.content = result
+                self.content = result.innerHTML
                 self.save()
 
           # Follow redirects to their source!

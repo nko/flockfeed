@@ -46,7 +46,7 @@
       } else {
         req.session['req.token'] = token;
         req.session['req.secret'] = secret;
-        return res.redirect(("http://api.twitter.com/oauth/authenticate?oauth_token=" + (token)));
+        return res.redirect("http://api.twitter.com/oauth/authenticate?oauth_token=" + (token));
       }
     });
   });
