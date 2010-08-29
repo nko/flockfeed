@@ -38,6 +38,7 @@ mongo.mongoose.model 'User',
       Link.find().where('user_id',this.id).sort([['status.created_at',-1]]).all (arr)->  
         callback(arr)
     job: (timeout, link) ->
+      Logger.debug 'Worker', "Starting job on #{link.url}"
       (worker) ->
         link.fetchContent ->
           worker.finish()
@@ -58,11 +59,13 @@ mongo.mongoose.model 'User',
         self.save()          
         for status in statuses
           if status.entities.urls
-            for url in status.entities.urls
-              Logger.debug "Link", "Creating '#{url.url}' from status '#{status.id}'"
-              links = Link.fromStatus(self,status)
-              for link in links
-                Logger.debug "User", "Adding job to retrieve url #{link.url}"
-                chain.add self.job("#{parseInt(process.env.WORKER_TIMEOUT) || 10}", link), "#{link._id}"
-
+            try
+              for url in status.entities.urls
+                Logger.debug "Link", "Creating '#{url.url}' from status '#{status.id}'"
+                links = Link.fromStatus(self,status)
+                for link in links
+                  Logger.debug "User", "Adding job to retrieve url #{link.url}"
+                  chain.add self.job("#{parseInt(process.env.WORKER_TIMEOUT) || 10}", link), "#{link._id}"
+            catch error
+              Logger.err "User", "CAUGHT YOU BITCH"
 exports.User = mongo.db.model 'User'

@@ -68,6 +68,7 @@
         });
       },
       job: function(timeout, link) {
+        Logger.debug('Worker', ("Starting job on " + (link.url)));
         return function(worker) {
           return link.fetchContent(function() {
             return worker.finish();
@@ -99,24 +100,28 @@
             status = _c[_b];
             _a.push((function() {
               if (status.entities.urls) {
-                _e = []; _g = status.entities.urls;
-                for (_f = 0, _h = _g.length; _f < _h; _f++) {
-                  url = _g[_f];
-                  _e.push((function() {
-                    Logger.debug("Link", ("Creating '" + (url.url) + "' from status '" + (status.id) + "'"));
-                    links = Link.fromStatus(self, status);
-                    _i = []; _k = links;
-                    for (_j = 0, _l = _k.length; _j < _l; _j++) {
-                      link = _k[_j];
-                      _i.push((function() {
-                        Logger.debug("User", ("Adding job to retrieve url " + (link.url)));
-                        return chain.add(self.job(("" + (parseInt(process.env.WORKER_TIMEOUT) || 10)), link), ("" + (link._id)));
-                      })());
-                    }
-                    return _i;
-                  })());
+                try {
+                  _e = []; _g = status.entities.urls;
+                  for (_f = 0, _h = _g.length; _f < _h; _f++) {
+                    url = _g[_f];
+                    _e.push((function() {
+                      Logger.debug("Link", ("Creating '" + (url.url) + "' from status '" + (status.id) + "'"));
+                      links = Link.fromStatus(self, status);
+                      _i = []; _k = links;
+                      for (_j = 0, _l = _k.length; _j < _l; _j++) {
+                        link = _k[_j];
+                        _i.push((function() {
+                          Logger.debug("User", ("Adding job to retrieve url " + (link.url)));
+                          return chain.add(self.job(("" + (parseInt(process.env.WORKER_TIMEOUT) || 10)), link), ("" + (link._id)));
+                        })());
+                      }
+                      return _i;
+                    })());
+                  }
+                  return _e;
+                } catch (error) {
+                  return Logger.err("User", "CAUGHT YOU BITCH");
                 }
-                return _e;
               }
             })());
           }

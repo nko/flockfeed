@@ -13,7 +13,7 @@ User = require('./user').User
 REST = require('./rest').Client
 Readability = require('./readability').Client
 hoptoad = require('hoptoad-notifier').Hoptoad
-    
+  
 # Setup Hoptoad Notification
 
 # debugging
@@ -33,19 +33,19 @@ app.set 'view engine', 'ejs'
 
 if process.env.RACK_ENV == 'production'
   hoptoad.key = '63da924b138bae57d1066c46accddbe7'
-  
+
   process.addListener 'uncaughtException', (error)->
     hoptoad.notify(error);
 
   app.error (err,req,res,next)->
     hoptoad.notify(err)
-  
+
     res.header 'Content-Type', 'text/html'
     res.render 'error.ejs',
       status: 500
 else
   app.use express.errorHandler(showStack: true, dumpExceptions: true)
-  
+
 app.get '/', (req,res)->
   res.render 'splash.ejs'
 
@@ -68,7 +68,7 @@ app.get '/oauth/callback', (req, res)->
       Logger.error 'Twitter', "Couldn't retrieve access token."
       res.redirect('/')
       return
-      
+    
     twitter = new Twitter.client(access_token, access_secret)
 
     twitter.get '/account/verify_credentials.json', (hash)->
@@ -106,14 +106,14 @@ app.get '/ready.json', (req,res)->
         res.send JSON.stringify(error:'Still working.'), 408
   else
     res.send JSON.stringify(error:'Not logged in.'), 401
-  
+
 
 app.get '/home', (req,res)->
   login_required req, res, (current_user) ->
     res.render 'home.ejs', 
       locals:
         current_user:current_user
-    
+  
 Content = require('./content').Content
 app.get '/readability', (req, res)->
   if typeof(req.param('url')) == 'undefined'
@@ -131,7 +131,7 @@ app.get '/feeds/:key', (req, res) ->
     unless user
       res.send '404 Not Found', 404
       return
-      
+    
     user.links (linkies)->
       res.header 'Content-Type', 'application/atom+xml'      
       res.render 'atom.ejs',
@@ -149,15 +149,12 @@ app.get '/admin/logs', (req, res)->
 # periodically fetch user timelines
 pollInterval = parseInt(process.env.POLL_INTERVAL) || 60 # seconds
 work = ->
-  process.nextTick ->
-    try
-      Logger.info "Worker", "Refreshing feeds..."
-      since = new Date(new Date().getTime() - pollInterval * 1000)
-      User.fetchOutdated since, ->
-        Logger.info "Worker", "Finished, starting again in #{pollInterval} seconds."
-        setTimeout work, pollInterval * 1000
-    catch error
-      Logger.warn "Worker", "Caught exception trying to refetch."
+  Logger.info "Worker", "Refreshing feeds..."
+  since = new Date(new Date().getTime() - pollInterval * 1000)
+  User.fetchOutdated since, ->
+    Logger.info "Worker", "Finished, starting again in #{pollInterval} seconds."
+    setTimeout work, pollInterval * 1000
+
 work()
 
 app.listen parseInt(process.env.PORT) || 3000

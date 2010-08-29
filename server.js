@@ -183,18 +183,12 @@
   });
   pollInterval = parseInt(process.env.POLL_INTERVAL) || 60;
   work = function() {
-    return process.nextTick(function() {
-      var since;
-      try {
-        Logger.info("Worker", "Refreshing feeds...");
-        since = new Date(new Date().getTime() - pollInterval * 1000);
-        return User.fetchOutdated(since, function() {
-          Logger.info("Worker", ("Finished, starting again in " + (pollInterval) + " seconds."));
-          return setTimeout(work, pollInterval * 1000);
-        });
-      } catch (error) {
-        return Logger.warn("Worker", "Caught exception trying to refetch.");
-      }
+    var since;
+    Logger.info("Worker", "Refreshing feeds...");
+    since = new Date(new Date().getTime() - pollInterval * 1000);
+    return User.fetchOutdated(since, function() {
+      Logger.info("Worker", ("Finished, starting again in " + (pollInterval) + " seconds."));
+      return setTimeout(work, pollInterval * 1000);
     });
   };
   work();
