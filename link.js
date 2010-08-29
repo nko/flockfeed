@@ -48,7 +48,15 @@
       },
       fetchContent: function() {
         return REST.get(this.url, function(response) {
-          return sys.puts(sys.inspect(response));
+          var title_match;
+          if (response.status >= 200 && response.status < 300) {
+            title_match = response.body.match(/<title>(.*)<\/title>/i);
+            if (title_match) {
+              this.title = title_match[1];
+              sys.puts(("Link] Title fetched successfully. (" + (this.title) + ")"));
+              return this.save;
+            }
+          }
         });
       }
     }

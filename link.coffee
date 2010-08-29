@@ -28,6 +28,11 @@ mongo.mongoose.model 'Link',
         fetchContent()
     fetchContent:->
       REST.get this.url,(response)->
-        sys.puts sys.inspect(response)
+        if response.status >= 200 && response.status < 300
+          title_match = response.body.match(/<title>(.*)<\/title>/i)
+          if title_match
+            this.title = title_match[1]
+            sys.puts "Link] Title fetched successfully. (#{this.title})"
+            this.save
         
 exports.Link = mongo.db.model 'Link'
