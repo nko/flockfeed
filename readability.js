@@ -16,16 +16,16 @@
     parse: function(content, callback) {
       document.innerHTML = content;
 
+    	// Replace all doubled-up <BR> tags with <P> tags, and remove fonts.
+    	var pattern =  new RegExp ("<br/?>[ \r\n\s]*<br/?>", "g");
+    	document.body.innerHTML = document.body.innerHTML.replace(pattern, "</p><p>").replace(/<\/?font[^>]*>/g, '');
+
     	var allParagraphs = document.getElementsByTagName("p");
     	var contentDiv = null;
     	var topDivParas =[];
 
     	var articleContent = document.createElement("DIV");
     	var articleTitle = document.createElement("H1");
-
-    	// Replace all doubled-up <BR> tags with <P> tags, and remove fonts.
-    	var pattern =  new RegExp ("<br/?>[ \r\n\s]*<br/?>", "g");
-    	document.body.innerHTML = document.body.innerHTML.replace(pattern, "</p><p>").replace(/<\/?font[^>]*>/g, '');
 
     	// Grab the title from the <title> tag and inject it as the title.
     	articleTitle.innerHTML = document.title;
@@ -34,44 +34,42 @@
     	// Study all the paragraphs and find the chunk that has the best score.
     	// A score is determined by things like: Number of <p>'s, commas, special classes, etc.
     	for (var j=0; j	< allParagraphs.length; j++) {
-    		parentNode = allParagraphs[j].parentNode;
+    		var parentNode = allParagraphs[j].parentNode;
 
-        if(parentNode == null) {
-          continue;
-        }
+        if(typeof(parentNode) != 'undefined') {
+      		// Initialize readability data
+      		if(typeof parentNode.readability == 'undefined')
+      		{
+      			parentNode.readability = {"contentScore": 0};
 
-    		// Initialize readability data
-    		if(typeof parentNode.readability == 'undefined')
-    		{
-    			parentNode.readability = {"contentScore": 0};
+      			// Look for a special classname
+      			if(parentNode.className.match(/(comment|meta|footer|footnote)/))
+      				parentNode.readability.contentScore -= 50;
+      			else if(parentNode.className.match(/((^|\\s)(post|hentry|entry[-]?(content|text|body)?|article[-]?(content|text|body)?)(\\s|$))/))
+      				parentNode.readability.contentScore += 25;
 
-    			// Look for a special classname
-    			if(parentNode.className.match(/(comment|meta|footer|footnote)/))
-    				parentNode.readability.contentScore -= 50;
-    			else if(parentNode.className.match(/((^|\\s)(post|hentry|entry[-]?(content|text|body)?|article[-]?(content|text|body)?)(\\s|$))/))
-    				parentNode.readability.contentScore += 25;
+      			// Look for a special ID
+      			if(parentNode.id.match(/(comment|meta|footer|footnote)/))
+      				parentNode.readability.contentScore -= 50;
+      			else if(parentNode.id.match(/^(post|hentry|entry[-]?(content|text|body)?|article[-]?(content|text|body)?)$/))
+      				parentNode.readability.contentScore += 25;
+      		}
 
-    			// Look for a special ID
-    			if(parentNode.id.match(/(comment|meta|footer|footnote)/))
-    				parentNode.readability.contentScore -= 50;
-    			else if(parentNode.id.match(/^(post|hentry|entry[-]?(content|text|body)?|article[-]?(content|text|body)?)$/))
-    				parentNode.readability.contentScore += 25;
-    		}
+      		// Add a point for the paragraph found
+      		if(this.getInnerText(allParagraphs[j]).length > 10)
+      			parentNode.readability.contentScore++;
 
-    		// Add a point for the paragraph found
-    		if(this.getInnerText(allParagraphs[j]).length > 10)
-    			parentNode.readability.contentScore++;
+      		// Add points for any commas within this paragraph
+      		parentNode.readability.contentScore += this.getCharCount(allParagraphs[j]);
 
-    		// Add points for any commas within this paragraph
-    		parentNode.readability.contentScore += this.getCharCount(allParagraphs[j]);
-
-    		topDivParas.push({ 'node': parentNode, 'score': parentNode.readability.contentScore })
+      		topDivParas.push({ 'node': parentNode, 'score': parentNode.readability.contentScore });
+      	}
     	}
 
-    	for (var j=0; j	< topDivParas.length; j++) {
-    	  var score = topDivParas[j].score;
+    	for (var i=0; i	< topDivParas.length; i++) {
+    	  var score = topDivParas[i].score;
         if (contentDiv == null || score > contentDiv.score) {
-          contentDiv = { 'node': topDivParas[j].node, 'score': score }
+          contentDiv = { 'node': topDivParas[i].node, 'score': score }
         }
       }
 
