@@ -28,7 +28,7 @@
         self = this;
         return self.find({
           'last_fetched': {
-            '$lt': since
+            '$lte': since
           }
         }).all(function(stale) {
           return self.find().where('last_fetched', null).all(function(virgin) {

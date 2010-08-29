@@ -110,7 +110,11 @@ app.get '/readability', (req, res)->
         { content: result.innerHTML, url: req.param('url') }      
 
 app.get '/feeds/:key', (req, res) ->
-  User.find(key: req.params.key).first (user)->
+  User.find(key:req.params.key).first (user)->
+    unless user
+      res.send '404 Not Found', 404
+      return
+      
     user.links (linkies)->
       res.header 'Content-Type', 'application/atom+xml'      
       res.render 'atom.ejs',

@@ -139,6 +139,10 @@
     return User.find({
       key: req.params.key
     }).first(function(user) {
+      if (!(user)) {
+        res.send('404 Not Found', 404);
+        return null;
+      }
       return user.links(function(linkies) {
         res.header('Content-Type', 'application/atom+xml');
         return res.render('atom.ejs', {
