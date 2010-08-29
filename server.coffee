@@ -12,13 +12,11 @@ Twitter = require './twitter'
 User = require('./user').User
 REST = require('./rest').Client
 Readability = require('./readability').Client
+hoptoad = require('hoptoad-notifier').Hoptoad
+    
+chainGang = require './vendor/.npm/chain-gang/active/package/lib'
 
 # Setup Hoptoad Notification
-if process.env.RACK_ENV == 'production'
-  hoptoad = require('hoptoad-notifier').Hoptoad
-  hoptoad.key = '63da924b138bae57d1066c46accddbe7'
-  process.addListener 'uncaughtException', (error)->
-    hoptoad.notify(error)
 
 # debugging
 pp = (obj) -> sys.puts sys.inspect(obj)
@@ -34,6 +32,14 @@ login_required = (req, res, success_callback) ->
 
 app = express.createServer connect.cookieDecoder(), connect.session(), express.staticProvider(__dirname + '/public'), express.logger({ format: ':method :url [:status] (:response-time ms)' })
 app.set 'view engine', 'ejs'
+
+app.error (err,req,res,next)->
+  if process.env.RACK_ENV == 'production'
+    hoptoad.key = '63da924b138bae57d1066c46accddbe7'
+    hoptoad.notify(err)
+  
+  res.render 'error.ejs',
+    status: 500
 
 app.get '/', (req,res)->
   res.render 'splash.ejs'
