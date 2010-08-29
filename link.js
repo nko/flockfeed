@@ -16,7 +16,7 @@
       }
     ],
     static: {
-      fromStatus: function(status) {
+      fromStatus: function(user, status) {
         var _a, _b, _c, l, links, url;
         links = [];
         if (status.entities.urls) {
@@ -24,6 +24,7 @@
           for (_a = 0, _c = _b.length; _a < _c; _a++) {
             url = _b[_a];
             l = new this.constructor();
+            l.user_id = user.id;
             l.url = url.url;
             l.status.id = status.id;
             l.status.text = status.text;

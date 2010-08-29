@@ -77,7 +77,8 @@ app.get '/oauth/callback', (req, res)->
             sys.puts sys.inspect(user)
             req.session.user_id = user.id
             res.redirect '/home'
-            user.fetch()
+            process.nextTick ->
+              user.fetch()
 
 app.get '/home', (req,res)->
   login_required req, res, (current_user) ->
@@ -95,12 +96,16 @@ app.get '/readability', (req, res)->
         { content: result.innerHTML, url: req.param('url') }      
 
 app.get '/feeds/:key', (req, res) ->
-  User.find(key: req.params.key).first (user) ->
-    headers = 'Content-Type': "text/xml"
-    res.render 'rss.ejs',
-      layout: false
-      locals:
-        user: user
+  User.find(key: req.params.key).first (user)->
+    sys.puts user.links
+    user.links (linkies)->
+      sys.puts sys.inspect(linkies)
+      res.header 'Content-Type', 'application/atom+xml'      
+      res.render 'atom.ejs',
+        layout: false
+        locals:
+          user: user
+          links: linkies
 
 
 # periodically fetch user timelines

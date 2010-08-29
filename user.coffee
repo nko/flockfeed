@@ -18,6 +18,9 @@ mongo.mongoose.model 'User',
       this.find('last_fetched':{'$lt':since}).all (users)->
         for user in users
           user.fetch()
+    fetch:(id)->
+      this.findById id,(user)->
+        user.fetch()
   getters:
     client: ->
       new Twitter.client(this.access.token, this.access.secret)
@@ -25,18 +28,24 @@ mongo.mongoose.model 'User',
     save:(callback)->
       this.key = crypto.createHash('sha1').update("--#{this._id}--url-hash").digest('hex')
       this.__super__ callback
+    links:(callback)->
+      Link.find().where('user_id',this.id).all (arr)->  
+        callback(arr)
     fetch:(callback)->
       path = '/statuses/home_timeline.json?include_entities=true&count=200'
       path += "&since_id=#{this.since_id}" if this.since_id
+      self = this
       this.client.get path, (statuses)->
+        if statuses[0]
+          self.since_id = statuses[0].id
         for status in statuses
           if status.entities.urls
             for url in status.entities.urls
               sys.puts "[Link] Creating '#{url.url}' from status '#{status.id}'"
-              links = Link.fromStatus(status)
+              links = Link.fromStatus(self,status)
               for link in links
                 link.fetchContent()
-      this.last_fetched = new Date()
-      this.save()
+        self.last_fetched = new Date()
+        self.save()
 
 exports.User = mongo.db.model 'User'

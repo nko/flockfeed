@@ -8,11 +8,12 @@ mongo = require('./mongo')
 mongo.mongoose.model 'Link',
   properties: ['url','title','user_id',{'status':['id','text',{'user':['screen_name','name']},'created_at']}]
   static:
-    fromStatus:(status)->
+    fromStatus:(user, status)->
       links = []
       if status.entities.urls
         for url in status.entities.urls
           l = new this.constructor()
+          l.user_id = user.id
           l.url = url.url
           l.status.id = status.id
           l.status.text = status.text

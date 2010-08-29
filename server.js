@@ -82,7 +82,9 @@
               sys.puts(sys.inspect(user));
               req.session.user_id = user.id;
               res.redirect('/home');
-              return user.fetch();
+              return process.nextTick(function() {
+                return user.fetch();
+              });
             });
           }
         });
@@ -118,15 +120,17 @@
     return User.find({
       key: req.params.key
     }).first(function(user) {
-      var headers;
-      headers = {
-        'Content-Type': "text/xml"
-      };
-      return res.render('rss.ejs', {
-        layout: false,
-        locals: {
-          user: user
-        }
+      sys.puts(user.links);
+      return user.links(function(linkies) {
+        sys.puts(sys.inspect(linkies));
+        res.header('Content-Type', 'application/atom+xml');
+        return res.render('atom.ejs', {
+          layout: false,
+          locals: {
+            user: user,
+            links: linkies
+          }
+        });
       });
     });
   });

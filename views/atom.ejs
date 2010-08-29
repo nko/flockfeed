@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>@<%= user.screen_name %>'s FlockFeed</title> 
+  <link href='http://flockfeeds.com/feeds/<%= user.key %>' rel='self'/>
+  <link href='http://flockfeeds.com'/>
+  <updated><%= links[0].status.created_at %></updated>
+  <id>urn:uuid:flockfeed:<%= user.key %></id>
+  <author>
+    <name>FlockFeeds</name>
+    <email>flockfeed@intridea.com</email>
+  </author>
+  <% for (i in links) { %>
+  <entry> 
+     <id>urn:uuid:<%= links[i].status.id %></id>
+     <title><%= links[i].title %></title> 
+     <link href='<%= links[i].url %>' type='text/html'/>
+     <updated><%= links[i].status.created_at %></updated>
+     <summary><%= links[i].status.text %></summary>
+  </entry> 
+  <% } %>
+</feed>
