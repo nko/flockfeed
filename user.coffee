@@ -8,7 +8,7 @@ mongo = require './mongo'
 Link = require('./link').Link
 
 mongo.mongoose.model 'User',
-  properties: ['id','name', 'screen_name', 'key', access:['token','secret'], 'last_fetched', 'since_id']
+  properties: ['last_fetched', 'since_id','id','name', 'screen_name', 'key', access:['token','secret']]
   indexes:['id','key']
   cast:
     id:Number

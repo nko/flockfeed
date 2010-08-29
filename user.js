@@ -9,10 +9,8 @@
   Link = require('./link').Link;
   mongo.mongoose.model('User', {
     properties: [
-      'id', 'name', 'screen_name', 'key', {
-        access: ['token', 'secret'],
-        'last_fetched': 'last_fetched',
-        'since_id': 'since_id'
+      'last_fetched', 'since_id', 'id', 'name', 'screen_name', 'key', {
+        access: ['token', 'secret']
       }
     ],
     indexes: ['id', 'key'],
