@@ -10,11 +10,7 @@ ejs = require 'ejs'
 Twitter = require './twitter'
 User = require('./user').User
 REST = require('./rest').Client
-
-# Readability
-jsdom = require 'jsdom'
-htmlparser = require './htmlparser'
-readability = require './readability'
+Readability = require('./readability').Client
 
 # Setup Hoptoad Notification
 if process.env.RACK_ENV == 'production'
@@ -93,17 +89,9 @@ app.get '/readability', (req, res)->
     return
 
   REST.get req.param('url'), (response)->
-    level = jsdom.defaultLevel
-    doc = new (level.Document)()
-    doc.createWindow = ->
-      window = jsdom.windowAugmentation(level, { document: doc, parser: htmlparser })
-      delete window.document.createWindow
-      return window
-    window = doc.createWindow()
-    window.document.innerHTML = response.body;
-    content = readability.parse(window.document, true)
-    res.render 'readability.ejs', locals:
-      { content: content.innerHTML, url: req.param('url') }
+    Readability.parse response.body, (result)->
+      res.render 'readability.ejs', locals:
+        { content: result.innerHTML, url: req.param('url') }      
 
 app.get '/feeds/:key', (req, res) ->
   User.find(key: req.params.key).first (user) ->

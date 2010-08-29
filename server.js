@@ -1,5 +1,5 @@
 (function() {
-  var REST, Twitter, User, app, connect, ejs, express, hoptoad, htmlparser, jsdom, login_required, pollInterval, pp, readability, sys, url;
+  var REST, Readability, Twitter, User, app, connect, ejs, express, hoptoad, login_required, pollInterval, pp, sys, url;
   require.paths.unshift('./vendor');
   require('express');
   sys = require('sys');
@@ -10,9 +10,7 @@
   Twitter = require('./twitter');
   User = require('./user').User;
   REST = require('./rest').Client;
-  jsdom = require('jsdom');
-  htmlparser = require('./htmlparser');
-  readability = require('./readability');
+  Readability = require('./readability').Client;
   if (process.env.RACK_ENV === 'production') {
     hoptoad = require('hoptoad-notifier').Hoptoad;
     hoptoad.key = '63da924b138bae57d1066c46accddbe7';
@@ -48,7 +46,7 @@
       } else {
         req.session['req.token'] = token;
         req.session['req.secret'] = secret;
-        return res.redirect(("http://api.twitter.com/oauth/authenticate?oauth_token=" + (token)));
+        return res.redirect("http://api.twitter.com/oauth/authenticate?oauth_token=" + (token));
       }
     });
   });
@@ -105,26 +103,13 @@
       return null;
     }
     return REST.get(req.param('url'), function(response) {
-      var content, doc, level, window;
-      level = jsdom.defaultLevel;
-      doc = new (level.Document)();
-      doc.createWindow = function() {
-        var window;
-        window = jsdom.windowAugmentation(level, {
-          document: doc,
-          parser: htmlparser
+      return Readability.parse(response.body, function(result) {
+        return res.render('readability.ejs', {
+          locals: {
+            content: result.innerHTML,
+            url: req.param('url')
+          }
         });
-        delete window.document.createWindow;
-        return window;
-      };
-      window = doc.createWindow();
-      window.document.innerHTML = response.body;
-      content = readability.parse(window.document, true);
-      return res.render('readability.ejs', {
-        locals: {
-          content: content.innerHTML,
-          url: req.param('url')
-        }
       });
     });
   });
