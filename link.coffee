@@ -6,6 +6,7 @@ Logger = require('./log').Logger
 Twitter = require './twitter'
 mongo = require('./mongo')
 Readability = require('./readability').Client
+Content = require('./content').Content
 
 mongo.mongoose.model 'Link',
   properties: ['url','redirects','title','user_id', 'content', {'status':['id','text',{'user':['screen_name','name']},'created_at']}]
@@ -33,7 +34,7 @@ mongo.mongoose.model 'Link',
         REST.get this.url,(response)->
           if response.status >= 200 && response.status < 300
             Logger.debug "Link", "Fetched successfully (#{self.url})"
-            Readability.parse response.body, (result)->
+            Content.for self, response.body, (result)->
               self.content = result.content
               self.title = result.title
               Logger.debug "Link", "Content parsed successfully. (#{self.title})"

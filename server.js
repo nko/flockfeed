@@ -1,5 +1,5 @@
 (function() {
-  var Logger, REST, Readability, Twitter, User, app, chainGang, connect, ejs, express, hoptoad, login_required, pollInterval, pp, sys, url, work;
+  var Content, Logger, REST, Readability, Twitter, User, app, chainGang, connect, ejs, express, hoptoad, login_required, pollInterval, pp, sys, url, work;
   require.paths.unshift('./vendor');
   require('express');
   sys = require('sys');
@@ -123,16 +123,19 @@
       });
     });
   });
+  Content = require('./content').Content;
   app.get('/readability', function(req, res) {
     if (typeof (req.param('url')) === 'undefined') {
       res.redirect('home');
       return null;
     }
     return REST.get(req.param('url'), function(response) {
-      return Readability.parse(response.body, function(result) {
+      return Content["for"]({
+        url: req.param('url')
+      }, response.body, function(content) {
         return res.render('readability.ejs', {
           locals: {
-            content: result.innerHTML,
+            content: content,
             url: req.param('url')
           }
         });
