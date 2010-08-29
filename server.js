@@ -1,5 +1,5 @@
 (function() {
-  var Logger, REST, Readability, Twitter, User, app, connect, ejs, express, hoptoad, login_required, pollInterval, pp, sys, url, work;
+  var Logger, REST, Readability, Twitter, User, app, connect, ejs, express, hoptoad, login_required, pp, sys, url;
   require.paths.unshift('./vendor');
   require('express');
   sys = require('sys');
@@ -151,22 +151,5 @@
       });
     });
   });
-  pollInterval = 300;
-  work = function() {
-    return process.nextTick(function() {
-      var since;
-      try {
-        Logger.info("Worker", "Refreshing feeds...");
-        since = new Date(new Date().getTime() - pollInterval * 1000);
-        return User.fetchOutdated(since, function() {
-          Logger.info("Worker", ("Finished, starting again in " + (pollInterval) + " seconds."));
-          return setTimeout(work, pollInterval * 1000);
-        });
-      } catch (error) {
-        return Logger.warn("Worker", "Caught exception trying to refetch.");
-      }
-    });
-  };
-  work();
   app.listen(parseInt(process.env.PORT) || 3000);
 })();

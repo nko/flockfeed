@@ -121,17 +121,17 @@ app.get '/feeds/:key', (req, res) ->
 
 
 # periodically fetch user timelines
-pollInterval = 300 # seconds
-work = ->
-  process.nextTick ->
-    try
-      Logger.info "Worker", "Refreshing feeds..."
-      since = new Date(new Date().getTime() - pollInterval * 1000)
-      User.fetchOutdated since, ->
-        Logger.info "Worker", "Finished, starting again in #{pollInterval} seconds."
-        setTimeout work, pollInterval * 1000
-    catch error
-      Logger.warn "Worker", "Caught exception trying to refetch."
-work()
+# pollInterval = 300 # seconds
+# work = ->
+#   process.nextTick ->
+#     try
+#       Logger.info "Worker", "Refreshing feeds..."
+#       since = new Date(new Date().getTime() - pollInterval * 1000)
+#       User.fetchOutdated since, ->
+#         Logger.info "Worker", "Finished, starting again in #{pollInterval} seconds."
+#         setTimeout work, pollInterval * 1000
+#     catch error
+#       Logger.warn "Worker", "Caught exception trying to refetch."
+# work()
 
 app.listen parseInt(process.env.PORT) || 3000
