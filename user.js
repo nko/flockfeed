@@ -67,8 +67,13 @@
         });
       },
       fetch: function(callback) {
-        var path, self;
-        path = '/statuses/home_timeline.json?include_entities=true&count=200';
+        var count, path, self;
+        if (this.since_id) {
+          count = 200;
+        } else {
+          count = 30;
+        }
+        path = ("/statuses/home_timeline.json?include_entities=true&count=" + (count));
         if (this.since_id) {
           path += ("&since_id=" + (this.since_id));
         }

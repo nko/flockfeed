@@ -57,11 +57,11 @@
               if (title_match) {
                 self.title = title_match[1].replace(/^\s+|\s+$/g, '');
                 Logger.debug("Link", ("Title fetched successfully. (" + (self.title) + ")"));
-                Readability.parse(response.body, function(result) {
-                  Logger.debug(("[Link] Content parsed successfully. (" + (self.title) + ")"));
-                  return (self.content = result);
+                return Readability.parse(response.body, function(result) {
+                  Logger.debug("Link", ("Content parsed successfully. (" + (self.title) + ")"));
+                  self.content = result;
+                  return self.save();
                 });
-                return self.save();
               }
             } else if ([300, 301, 302, 303, 305, 307].indexOf(response.status) !== -1 && self.redirects <= 3) {
               location = response.headers['Location'] || response.headers['location'];

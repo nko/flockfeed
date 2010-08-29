@@ -37,7 +37,12 @@ mongo.mongoose.model 'User',
       Link.find().where('user_id',this.id).sort('status.created_at',-1).all (arr)->  
         callback(arr)
     fetch:(callback)->
-      path = '/statuses/home_timeline.json?include_entities=true&count=200'
+      if this.since_id
+        count = 200
+      else
+        count = 30
+        
+      path = "/statuses/home_timeline.json?include_entities=true&count=#{count}"
       path += "&since_id=#{this.since_id}" if this.since_id
       self = this
       this.client.get path, (statuses)->
