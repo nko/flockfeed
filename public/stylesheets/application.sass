@@ -33,7 +33,7 @@ a
       
 #content
   +vertical-gradient(rgba(0,0,0,0),rgba(0,0,0,0.2),#fff)
-  padding: 20px
+  padding: 20px 25px
   +box-shadow(0,10px,10px,rgba(0,0,0,0.3))
   h1, h2, h3
     font-family: Helvetica, Arial, sans-serif
@@ -42,11 +42,11 @@ a
   > h1:first-child
     +vertical-gradient(#444,#222,#333)
     color: white
-    margin: -20px -20px 20px
+    margin: -20px -25px 20px
     padding: 8px 16px
     +box-shadow(0px,2px,8px,rgba(0,0,0,0.3))
-  > p
-    line-height: 140%
+  p
+    line-height: 150%
   
 #content_top
   +vertical-gradient(#ccc,#999)
@@ -62,6 +62,7 @@ a
   padding: 6px 0
   font-size: 12px
   text-shadow: 1px 1px 1px rgba(255,255,255,0.2)
+  margin-bottom: 30px
 
 =impression
   +vertical-gradient(#ccc,#aaa,#bbb)
@@ -102,3 +103,20 @@ article.person
     margin: 10px 0 0
     line-height: 140%
     font-size: 14px
+    
+#rss_link
+  display: block
+  margin: 40px 30px
+  +impression
+  font-family: Helvetica, Arial, sans-serif
+  font-size: 22px
+  padding: 15px 10px 15px 60px
+  text-decoration: none
+  background-image: url(/images/rss.png)
+  background-repeat: no-repeat
+  background-position: 10px 7px
+  &:hover
+    +vertical-gradient(#ddd,#bbb,#ccc)
+    background-image: url(/images/rss.png)
+    background-repeat: no-repeat
+    background-position: 10px 7px
