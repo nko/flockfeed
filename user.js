@@ -57,7 +57,7 @@
     },
     methods: {
       save: function(callback) {
-        this.key = crypto.createHash('sha1').update(("--" + (this._id) + "--url-hash")).digest('hex');
+        this.key = crypto.createHash('sha1').update("--" + (this._id) + "--url-hash").digest('hex');
         return this.__super__(callback);
       },
       links: function(callback) {
@@ -88,7 +88,7 @@
                 for (_f = 0, _h = _g.length; _f < _h; _f++) {
                   url = _g[_f];
                   _e.push((function() {
-                    sys.puts(("[Link] Creating '" + (url.url) + "' from status '" + (status.id) + "'"));
+                    sys.puts("[Link] Creating '" + (url.url) + "' from status '" + (status.id) + "'");
                     links = Link.fromStatus(self, status);
                     _i = []; _k = links;
                     for (_j = 0, _l = _k.length; _j < _l; _j++) {

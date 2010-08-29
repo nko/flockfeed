@@ -4,9 +4,10 @@ REST = require('./rest').Client
 sys = require 'sys'
 Twitter = require './twitter'
 mongo = require('./mongo')
+Readability = require('./readability').Client
 
 mongo.mongoose.model 'Link',
-  properties: ['url','redirects','title','user_id',{'status':['id','text',{'user':['screen_name','name']},'created_at']}]
+  properties: ['url','redirects','title','user_id', 'content', {'status':['id','text',{'user':['screen_name','name']},'created_at']}]
   static:
     fromStatus:(user, status)->
       links = []
@@ -34,6 +35,9 @@ mongo.mongoose.model 'Link',
               self.title = title_match[1].replace(/^\s+|\s+$/g, '')
               sys.puts "[Link] Title fetched successfully. (#{self.title})"
               self.save()
+            Readability.parse response.body, (result)->
+              sys.puts "[Link] Content parsed successfully. (#{self.title})"
+              self.content = result
           # Follow redirects to their source!
           else if response.status >= 300 && response.status < 400 and self.redirects <= 3
             location = response.headers['Location'] || response.headers['location']

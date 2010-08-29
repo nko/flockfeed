@@ -1,13 +1,14 @@
 (function() {
-  var REST, Twitter, mongo, sys;
+  var REST, Readability, Twitter, mongo, sys;
   require.paths.unshift('./vendor');
   REST = require('./rest').Client;
   sys = require('sys');
   Twitter = require('./twitter');
   mongo = require('./mongo');
+  Readability = require('./readability').Client;
   mongo.mongoose.model('Link', {
     properties: [
-      'url', 'redirects', 'title', 'user_id', {
+      'url', 'redirects', 'title', 'user_id', 'content', {
         'status': [
           'id', 'text', {
             'user': ['screen_name', 'name']
@@ -45,18 +46,22 @@
           self = this;
           return REST.get(this.url, function(response) {
             var location, title_match;
-            if (response.status >= 200 && response.status < 300) {
+            if ((response.status >= 200) && response.status < 300) {
               title_match = response.body.match(/<title>(.*)<\/title>/mi);
               if (title_match) {
                 self.title = title_match[1].replace(/^\s+|\s+$/g, '');
-                sys.puts(("[Link] Title fetched successfully. (" + (self.title) + ")"));
-                return self.save();
+                sys.puts("[Link] Title fetched successfully. (" + (self.title) + ")");
+                self.save();
               }
-            } else if (response.status >= 300 && response.status < 400 && self.redirects <= 3) {
+              return Readability.parse(response.body, function(result) {
+                sys.puts("[Link] Content parsed successfully. (" + (self.title) + ")");
+                return (self.content = result);
+              });
+            } else if ((response.status >= 300) && response.status < 400 && (self.redirects <= 3)) {
               location = response.headers['Location'] || response.headers['location'];
-              sys.puts(("[Link] " + (self.url) + " is a redirect, following to " + (location)));
+              sys.puts("[Link] " + (self.url) + " is a redirect, following to " + (location));
               self.url = location;
-              self.redirects = self.redirects || 0;
+              self.redirects || (self.redirects = 0);
               self.redirects += 1;
               return self.save(function() {
                 return self.fetchContent();
@@ -64,7 +69,7 @@
             }
           });
         } catch (error) {
-          return sys.puts(("[Link] " + (self.url) + " could not be fetched."));
+          return sys.puts("[Link] " + (self.url) + " could not be fetched.");
         }
       }
     }

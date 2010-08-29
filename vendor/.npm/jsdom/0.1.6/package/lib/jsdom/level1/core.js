@@ -1046,9 +1046,12 @@ core.Document.prototype = {
   /* returns Element */
   createElement: function(/* string */ tagName) {
     var c = [], lower = tagName.toLowerCase(), element;
+    /* 
+    hmm another one that likes to throw errors (sts 8/29/10)
     if (!tagName || !tagName.match || (c = tagName.match(/[^\w:\d_-]+/i))) {
       throw new core.DOMException(INVALID_CHARACTER_ERR, 'Invalid character in tag name: ' + c.pop());
     }
+    */
 
     if (this._elementBuilders[lower]) {
       element = this._elementBuilders[lower](this, tagName);
