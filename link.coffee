@@ -39,7 +39,7 @@ mongo.mongoose.model 'Link',
           if response.status >= 200 && response.status < 300
             content_type = response.headers['Content-Type'] || response.headers['content-type']
             Logger.debug "Link", "Content Type: #{content_type}"
-            if content_type.indexOf('image') > 0
+            if content_type.indexOf('image') >= 0
               self.content = "<body><p><img src='#{res.body}'></p></body>"
               self.save()
             else if content_type.indexOf('text/html') >= 0
