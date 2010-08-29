@@ -1,8 +1,9 @@
 (function() {
-  var REST, Readability, Twitter, mongo, sys;
+  var Logger, REST, Readability, Twitter, mongo, sys;
   require.paths.unshift('./vendor');
   REST = require('./rest').Client;
   sys = require('sys');
+  Logger = require('./log').Logger;
   Twitter = require('./twitter');
   mongo = require('./mongo');
   Readability = require('./readability').Client;
@@ -14,6 +15,11 @@
             'user': ['screen_name', 'name']
           }, 'created_at'
         ]
+      }
+    ],
+    indexes: [
+      'user_id', {
+        'status.created_at': -1
       }
     ],
     static: {
@@ -50,16 +56,16 @@
               title_match = response.body.match(/<title>(.*)<\/title>/mi);
               if (title_match) {
                 self.title = title_match[1].replace(/^\s+|\s+$/g, '');
-                sys.puts("[Link] Title fetched successfully. (" + (self.title) + ")");
+                Logger.debug("Link", "Title fetched successfully. (" + (self.title) + ")");
                 self.save();
               }
               return Readability.parse(response.body, function(result) {
                 sys.puts("[Link] Content parsed successfully. (" + (self.title) + ")");
                 return (self.content = result);
               });
-            } else if ((response.status >= 300) && response.status < 400 && (self.redirects <= 3)) {
+            } else if ([300, 301, 302, 303, 305, 307].indexOf(response.status) !== -1 && (self.redirects <= 3)) {
               location = response.headers['Location'] || response.headers['location'];
-              sys.puts("[Link] " + (self.url) + " is a redirect, following to " + (location));
+              Logger.debug("Link", "" + (self.url) + " is a redirect, following to " + (location));
               self.url = location;
               self.redirects || (self.redirects = 0);
               self.redirects += 1;
@@ -69,7 +75,7 @@
             }
           });
         } catch (error) {
-          return sys.puts("[Link] " + (self.url) + " could not be fetched.");
+          return Logger.warn("Link", "" + (self.url) + " could not be fetched.");
         }
       }
     }

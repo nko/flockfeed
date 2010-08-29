@@ -1,5 +1,5 @@
 (function() {
-  var REST, Readability, Twitter, User, app, connect, ejs, express, hoptoad, login_required, pollInterval, pp, sys, url;
+  var Logger, REST, Readability, Twitter, User, app, connect, ejs, express, hoptoad, login_required, pollInterval, pp, sys, url, work;
   require.paths.unshift('./vendor');
   require('express');
   sys = require('sys');
@@ -7,6 +7,7 @@
   connect = require('connect');
   express = require('express');
   ejs = require('ejs');
+  Logger = require('./log').Logger;
   Twitter = require('./twitter');
   User = require('./user').User;
   REST = require('./rest').Client;
@@ -61,14 +62,13 @@
       }
       twitter = new Twitter.client(access_token, access_secret);
       return twitter.get('/account/verify_credentials.json', function(hash) {
-        sys.puts("Creating user in Mongo...");
         return User.find().where('id', hash.id).first(function(user) {
           if (user) {
-            sys.puts("[User] Existing user logged in.");
+            Logger.info("User", "Existing user logged in.");
             req.session.user_id = user.id;
             return res.redirect('/home');
           } else {
-            sys.puts("[User] Creating new user.");
+            Logger.info("User", "Creating new user.");
             user = new User();
             user.id = hash.id;
             user.screen_name = hash.screen_name;
@@ -151,11 +151,22 @@
       });
     });
   });
-  pollInterval = 3;
-  setInterval(function() {
-    var since;
-    since = new Date(new Date().getTime() - pollInterval * 1000);
-    return User.fetchOutdated(since, pollInterval * 1000);
-  });
+  pollInterval = 300;
+  work = function() {
+    return process.nextTick(function() {
+      var since;
+      try {
+        Logger.info("Worker", "Refreshing feeds...");
+        since = new Date(new Date().getTime() - pollInterval * 1000);
+        return User.fetchOutdated(since, function() {
+          Logger.info("Worker", "Finished, starting again in " + (pollInterval) + " seconds.");
+          return setTimeout(work, pollInterval * 1000);
+        });
+      } catch (error) {
+        return Logger.warn("Worker", "Caught exception trying to refetch.");
+      }
+    });
+  };
+  work();
   app.listen(parseInt(process.env.PORT) || 3000);
 })();

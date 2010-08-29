@@ -1,5 +1,6 @@
 http = require 'http'
 url = require 'url'
+Logger = require('./log').Logger
 
 Client =
   request:(method,request_url,callback)->

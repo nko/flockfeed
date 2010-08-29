@@ -1,6 +1,9 @@
 require.paths.unshift './vendor'
+
 sys = require 'sys'
 OAuth = require('oauth').OAuth
+Logger = require('./log').Logger
+
 Consumer = new OAuth(
   'http://api.twitter.com/oauth/request_token', 
   'http://api.twitter.com/oauth/access_token', 
@@ -15,10 +18,10 @@ Client = (token, secret)->
   
 Client.prototype.request = (method, path, callback)->
   url = "http://api.twitter.com/1#{path}"
-  sys.puts "[Twitter] Fetching #{path}"
+  Logger.info "Twitter", "Fetching #{path}"
   Consumer.getProtectedResource url, method, this.token, this.secret, (error, data, response)->
     if error
-      sys.puts sys.inspect(error)
+      Logger.error "Twitter", "Unable to fetch the timeline.", JSON.stringify(error)
     else
       callback JSON.parse(data)
     

@@ -1,7 +1,8 @@
 (function() {
-  var Client, http, url;
+  var Client, Logger, http, url;
   http = require('http');
   url = require('url');
+  Logger = require('./log').Logger;
   Client = {
     request: function(method, request_url, callback) {
       var client, request, res, uri;
