@@ -10,6 +10,13 @@ ejs = require 'ejs'
 Twitter = require './twitter'
 User = require('./user').User
 
+# Readability
+http = require 'http'
+querystring = require 'querystring'
+jsdom = require 'jsdom'
+htmlparser = require './htmlparser'
+readability = require './readability'
+
 # Setup Hoptoad Notification
 if process.env.RACK_ENV == 'production'
   hoptoad = require('hoptoad-notifier').Hoptoad

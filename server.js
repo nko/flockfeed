@@ -1,5 +1,5 @@
 (function() {
-  var Twitter, User, app, connect, ejs, express, hoptoad, login_required, pollInterval, pp, sys, url;
+  var Twitter, User, app, connect, ejs, express, hoptoad, htmlparser, http, jsdom, login_required, pollInterval, pp, querystring, readability, sys, url;
   require.paths.unshift('./vendor');
   require('express');
   sys = require('sys');
@@ -9,6 +9,11 @@
   ejs = require('ejs');
   Twitter = require('./twitter');
   User = require('./user').User;
+  http = require('http');
+  querystring = require('querystring');
+  jsdom = require('jsdom');
+  htmlparser = require('./htmlparser');
+  readability = require('./readability');
   if (process.env.RACK_ENV === 'production') {
     hoptoad = require('hoptoad-notifier').Hoptoad;
     hoptoad.key = '63da924b138bae57d1066c46accddbe7';
@@ -44,7 +49,7 @@
       } else {
         req.session['req.token'] = token;
         req.session['req.secret'] = secret;
-        return res.redirect(("http://api.twitter.com/oauth/authenticate?oauth_token=" + (token)));
+        return res.redirect("http://api.twitter.com/oauth/authenticate?oauth_token=" + (token));
       }
     });
   });
