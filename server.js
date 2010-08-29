@@ -1,5 +1,5 @@
 (function() {
-  var Logger, REST, Readability, Twitter, User, app, connect, ejs, express, hoptoad, login_required, pollInterval, pp, sys, url, work;
+  var Logger, REST, Readability, Twitter, User, app, chainGang, connect, ejs, express, hoptoad, login_required, pollInterval, pp, sys, url, work;
   require.paths.unshift('./vendor');
   require('express');
   sys = require('sys');
@@ -13,6 +13,7 @@
   REST = require('./rest').Client;
   Readability = require('./readability').Client;
   hoptoad = require('hoptoad-notifier').Hoptoad;
+  chainGang = require('./vendor/.npm/chain-gang/active/package/lib');
   pp = function(obj) {
     return sys.puts(sys.inspect(obj));
   };

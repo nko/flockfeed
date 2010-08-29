@@ -8,6 +8,7 @@
     "mongodb":"",
     "hoptoad-notifier":"",
     "jsdom":"",
-    "mongoose":">= 0.0.3"
+    "mongoose":">= 0.0.3",
+    "chain-gang":""
   }
 }

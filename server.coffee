@@ -14,6 +14,8 @@ REST = require('./rest').Client
 Readability = require('./readability').Client
 hoptoad = require('hoptoad-notifier').Hoptoad
     
+chainGang = require './vendor/.npm/chain-gang/active/package/lib'
+
 # Setup Hoptoad Notification
 
 # debugging
