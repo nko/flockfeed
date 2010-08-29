@@ -22,7 +22,7 @@ Content =
         fn(result)
       else
         Logger.debug "Link", "Could not parse content of #{link.url}"
-        fn("")
+        fn({ content: '', title: '' })
 
 Content.addHandler /youtube\.com\/watch.*[?&]v=([^&]+)/i, (match)->
   YouTube.player(match[1])
