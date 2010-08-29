@@ -12,7 +12,7 @@
   Client.prototype.request = function(method, path, callback) {
     var url;
     url = ("http://api.twitter.com/1" + (path));
-    Logger.info("Twitter", "Fetching " + (path));
+    Logger.info("Twitter", ("Fetching " + (path)));
     return Consumer.getProtectedResource(url, method, this.token, this.secret, function(error, data, response) {
       return error ? Logger.error("Twitter", "Unable to fetch the timeline.", JSON.stringify(error)) : callback(JSON.parse(data));
     });

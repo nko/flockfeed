@@ -28,9 +28,15 @@ mongo.mongoose.model 'Log',
     error: (cat,msg,ld,fn)-> 
       this.log 'error',cat,msg,ld,fn
     fetch:(level,category,fn)->
+      if !fn and !category
+        fn = level
+      else if !fn
+        fn = category
+        
       q = this.find()
       q.where('level',level) if level
       q.where('category',category) if category
+      q.limit(100)
       q.sort('created_at',-1)
       q.all (logs)->
         fn(logs)

@@ -119,6 +119,11 @@ app.get '/feeds/:key', (req, res) ->
           user: user
           links: linkies
 
+app.get '/admin/logs', (req, res)->
+  Logger.fetch (logs)->
+    res.render 'logs.ejs',
+      locals:
+        logs:logs
 
 # periodically fetch user timelines
 # pollInterval = 300 # seconds

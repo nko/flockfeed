@@ -46,7 +46,7 @@
       } else {
         req.session['req.token'] = token;
         req.session['req.secret'] = secret;
-        return res.redirect("http://api.twitter.com/oauth/authenticate?oauth_token=" + (token));
+        return res.redirect(("http://api.twitter.com/oauth/authenticate?oauth_token=" + (token)));
       }
     });
   });
@@ -148,6 +148,15 @@
             links: linkies
           }
         });
+      });
+    });
+  });
+  app.get('/admin/logs', function(req, res) {
+    return Logger.fetch(function(logs) {
+      return res.render('logs.ejs', {
+        locals: {
+          logs: logs
+        }
       });
     });
   });

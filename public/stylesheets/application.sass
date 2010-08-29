@@ -3,6 +3,7 @@
 
 body, html
   min-height: 100%
+  padding: 0
 
 body
   font-family: "Lucida Grande", "Lucida Sans", sans-serif
@@ -173,3 +174,48 @@ article.person
   h1, h2
     color: white
     text-shadow 2px 2px 7px rgba(0,0,0,0.5)
+    
+table#logs
+  width: 100%
+  overflow: hidden
+  font-size: 11px  
+  border-collapse: collapse
+  thead
+    th
+      background: #666
+      color: white
+      padding: 4px 6px
+  tbody
+    td, th
+      padding: 4px 6px
+      overflow: hidden
+      background: white
+      border-bottom: 1px solid #ddd
+      
+#announcement
+  display: none
+  position: fixed
+  width: 100%
+  background: rgba(0,0,0,0.5)
+  color: white
+  padding: 6px 0
+  font-size: 16px
+  top: 0
+  left: 0
+  z-index: 100000
+  border-bottom: 1px solid black
+  +box-shadow(0px,1px,6px, black)
+  p
+    width: 960px
+    margin: 0 auto
+    text-align: center
+    text-shadow 1px 1px 3px black    
+  a
+    color: white
+    
+body.announcement
+  padding-top: 20px
+  #announcement
+    display: block
+  #nko_vote
+    margin-top: 30px

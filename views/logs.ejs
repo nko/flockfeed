@@ -1,0 +1,34 @@
+<h1>Application Logs</h1>
+
+<table id='logs'>
+  <thead>
+    <tr>
+      <th>Level</th>
+      <th>Category</th>
+      <th>Message</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% for (i in logs) { var log = logs[i]; %>
+    <tr>
+      <th><%= log.level %></th>
+      <th><%= log.category %></th>
+      <td><%= log.message %></td>
+    </tr>
+    <% } %>
+  </tbody>
+</table>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    $('#logs tbody td').each(function() {
+      var parts = $(this).text().split(' ')
+      var newString = ''
+      for (i in parts) {
+        if (parts[i].length > 75)
+          parts[i] = parts[i].substr(0,72) + '...'
+      }
+      $(this).text(parts.join(' '));
+    });
+  });
+</script>

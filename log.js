@@ -13,8 +13,8 @@
     static: {
       log: function(level, category, message, payload, fn) {
         var l;
-        if (process.env.RACK_ENV !== 'production') {
-          sys.puts("[" + (category) + "] " + (message));
+        if (!(process.env.RACK_ENV === 'production')) {
+          sys.puts(("[" + (category) + "] " + (message)));
         }
         l = new this.constructor();
         l.level = level;
@@ -42,6 +42,11 @@
       },
       fetch: function(level, category, fn) {
         var q;
+        if (!fn && !category) {
+          fn = level;
+        } else if (!fn) {
+          fn = category;
+        }
         q = this.find();
         if (level) {
           q.where('level', level);
@@ -49,6 +54,7 @@
         if (category) {
           q.where('category', category);
         }
+        q.limit(100);
         q.sort('created_at', -1);
         return q.all(function(logs) {
           return fn(logs);
