@@ -11,19 +11,17 @@ Content =
     Content.domains.push(domain)
     Content.handlers[domain] = handler
   for:(link, body, fn)->
-    self = this
     for domain in Content.domains
       match = domain.exec link.url
-      sys.puts sys.inspect(domain)
       if match
         Logger.debug "Content", "Matched #{domain}"
         return fn(Content.handlers[domain].call(link, match))
     Readability.parse body, (result)->
       if result
-        Logger.debug "Link", "Content parsed successfully. (#{self.url})"
+        Logger.debug "Link", "Content parsed successfully. (#{link.url})"
         fn(result.innerHTML)
       else
-        Logger.debug "Link", "Could not parse content of #{self.url}"
+        Logger.debug "Link", "Could not parse content of #{link.url}"
         fn("")
 
 Content.addHandler /youtube\.com\/watch.*[?&]v=([^&]+)/i, (match)->

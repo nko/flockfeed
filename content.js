@@ -12,13 +12,11 @@
       return (Content.handlers[domain] = handler);
     },
     "for": function(link, body, fn) {
-      var _a, _b, _c, domain, match, self;
-      self = this;
+      var _a, _b, _c, domain, match;
       _b = Content.domains;
       for (_a = 0, _c = _b.length; _a < _c; _a++) {
         domain = _b[_a];
         match = domain.exec(link.url);
-        sys.puts(sys.inspect(domain));
         if (match) {
           Logger.debug("Content", ("Matched " + (domain)));
           return fn(Content.handlers[domain].call(link, match));
@@ -26,10 +24,10 @@
       }
       return Readability.parse(body, function(result) {
         if (result) {
-          Logger.debug("Link", ("Content parsed successfully. (" + (self.url) + ")"));
+          Logger.debug("Link", ("Content parsed successfully. (" + (link.url) + ")"));
           return fn(result.innerHTML);
         } else {
-          Logger.debug("Link", ("Could not parse content of " + (self.url)));
+          Logger.debug("Link", ("Could not parse content of " + (link.url)));
           return fn("");
         }
       });

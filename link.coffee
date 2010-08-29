@@ -33,7 +33,7 @@ mongo.mongoose.model 'Link',
         self = this
         REST.get this.url,(response)->
           if response.status >= 200 && response.status < 300
-            title_match = response.body.match /(.*)<\/title>/mi
+            title_match = response.body.match /<title>\s*(.*)\s*<\/title>/mi
             if title_match
               self.title = title_match[1].replace(/^\s+|\s+$/g, '')
               Logger.debug "Link", "Title fetched successfully. (#{self.title})"
