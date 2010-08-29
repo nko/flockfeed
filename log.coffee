@@ -37,7 +37,8 @@ mongo.mongoose.model 'Log',
       q.where('level',level) if level
       q.where('category',category) if category
       q.limit(100)
-      q.sort({'$natural':-1})
+      q.sort([['$natural',-1]])
+      sys.puts sys.inspect(q)
       q.all (logs)->
         fn(logs)
     
