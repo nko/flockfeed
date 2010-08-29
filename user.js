@@ -25,18 +25,23 @@
         }).first(callback);
       },
       fetchOutdated: function(since) {
-        return this.find({
+        var self;
+        self = this;
+        return self.find({
           'last_fetched': {
             '$lt': since
           }
-        }).all(function(users) {
-          var _a, _b, _c, _d, user;
-          _a = []; _c = users;
-          for (_b = 0, _d = _c.length; _b < _d; _b++) {
-            user = _c[_b];
-            _a.push(user.fetch());
-          }
-          return _a;
+        }).all(function(stale) {
+          return self.find().where('last_fetched', null).all(function(virgin) {
+            var _a, _b, _c, _d, user, users;
+            users = stale.concat(virgin);
+            _a = []; _c = users;
+            for (_b = 0, _d = _c.length; _b < _d; _b++) {
+              user = _c[_b];
+              _a.push(user.fetch());
+            }
+            return _a;
+          });
         });
       },
       fetch: function(id) {
@@ -68,29 +73,36 @@
         }
         self = this;
         return this.client.get(path, function(statuses) {
-          var _a, _b, _c, _d, _e, _f, _g, _h, _i, link, links, status, url;
+          var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, link, links, status, url;
+          self.last_fetched = new Date();
           if (statuses[0]) {
             self.since_id = statuses[0].id;
           }
-          _b = statuses;
-          for (_a = 0, _c = _b.length; _a < _c; _a++) {
-            status = _b[_a];
-            if (status.entities.urls) {
-              _e = status.entities.urls;
-              for (_d = 0, _f = _e.length; _d < _f; _d++) {
-                url = _e[_d];
-                sys.puts(("[Link] Creating '" + (url.url) + "' from status '" + (status.id) + "'"));
-                links = Link.fromStatus(self, status);
-                _h = links;
-                for (_g = 0, _i = _h.length; _g < _i; _g++) {
-                  link = _h[_g];
-                  link.fetchContent();
+          self.save();
+          _a = []; _c = statuses;
+          for (_b = 0, _d = _c.length; _b < _d; _b++) {
+            status = _c[_b];
+            _a.push((function() {
+              if (status.entities.urls) {
+                _e = []; _g = status.entities.urls;
+                for (_f = 0, _h = _g.length; _f < _h; _f++) {
+                  url = _g[_f];
+                  _e.push((function() {
+                    sys.puts(("[Link] Creating '" + (url.url) + "' from status '" + (status.id) + "'"));
+                    links = Link.fromStatus(self, status);
+                    _i = []; _k = links;
+                    for (_j = 0, _l = _k.length; _j < _l; _j++) {
+                      link = _k[_j];
+                      _i.push(link.fetchContent());
+                    }
+                    return _i;
+                  })());
                 }
+                return _e;
               }
-            }
+            })());
           }
-          self.last_fetched = new Date();
-          return self.save();
+          return _a;
         });
       }
     }

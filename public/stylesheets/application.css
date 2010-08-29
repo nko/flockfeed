@@ -257,3 +257,8 @@ article.person {
     background-image: url(/images/rss.png);
     background-repeat: no-repeat;
     background-position: 10px 7px; }
+
+#loading {
+  text-align: center; }
+  #loading h1, #loading h2 {
+    color: white; }

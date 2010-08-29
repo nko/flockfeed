@@ -41,27 +41,31 @@
     methods: {
       fetchContent: function() {
         var self;
-        self = this;
-        return REST.get(this.url, function(response) {
-          var location, title_match;
-          if (response.status >= 200 && response.status < 300) {
-            title_match = response.body.match(/<title>(.*)<\/title>/mi);
-            if (title_match) {
-              self.title = title_match[1].replace(/^\s+|\s+$/g, '');
-              sys.puts(("[Link] Title fetched successfully. (" + (self.title) + ")"));
-              return self.save();
+        try {
+          self = this;
+          return REST.get(this.url, function(response) {
+            var location, title_match;
+            if (response.status >= 200 && response.status < 300) {
+              title_match = response.body.match(/<title>(.*)<\/title>/mi);
+              if (title_match) {
+                self.title = title_match[1].replace(/^\s+|\s+$/g, '');
+                sys.puts(("[Link] Title fetched successfully. (" + (self.title) + ")"));
+                return self.save();
+              }
+            } else if (response.status >= 300 && response.status < 400 && self.redirects <= 3) {
+              location = response.headers['Location'] || response.headers['location'];
+              sys.puts(("[Link] " + (self.url) + " is a redirect, following to " + (location)));
+              self.url = location;
+              self.redirects = self.redirects || 0;
+              self.redirects += 1;
+              return self.save(function() {
+                return self.fetchContent();
+              });
             }
-          } else if (response.status >= 300 && response.status < 400 && self.redirects <= 3) {
-            location = response.headers['Location'] || response.headers['location'];
-            sys.puts(("[Link] " + (self.url) + " is a redirect, following to " + (location)));
-            self.url = location;
-            self.redirects = self.redirects || 0;
-            self.redirects += 1;
-            return self.save(function() {
-              return self.fetchContent();
-            });
-          }
-        });
+          });
+        } catch (error) {
+          return sys.puts(("[Link] " + (self.url) + " could not be fetched."));
+        }
       }
     }
   });

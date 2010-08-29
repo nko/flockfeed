@@ -24,7 +24,6 @@ pp = (obj) -> sys.puts sys.inspect(obj)
 
 # helpers
 login_required = (req, res, success_callback) ->
-  pp req.session
   if req.session['user_id']
     User.findById parseInt(req.session.user_id), (current_user)->
       success_callback(current_user)
@@ -56,17 +55,15 @@ app.get '/oauth/callback', (req, res)->
     throw error if error
     twitter = new Twitter.client(access_token, access_secret)
 
-    sys.puts "Retrieving user info..."
     twitter.get '/account/verify_credentials.json', (hash)->
       sys.puts "Creating user in Mongo..."
       User.find().where('id',hash.id).first (user)->
         if user
-          sys.puts sys.inspect(user)
-          sys.puts "Found existing user..."
+          sys.puts "[User] Existing user logged in."
           req.session.user_id = user.id
           res.redirect '/home'
         else
-          sys.puts "Creating new user..."
+          sys.puts "[User] Creating new user."
           user = new User()
           user.id = hash.id
           user.screen_name = hash.screen_name
@@ -74,17 +71,34 @@ app.get '/oauth/callback', (req, res)->
           user.access.token = access_token
           user.access.secret = access_secret
           user.save ->
-            sys.puts sys.inspect(user)
             req.session.user_id = user.id
             res.redirect '/home'
             process.nextTick ->
               user.fetch()
 
-app.get '/home', (req,res)->
-  login_required req, res, (current_user) ->
-    res.render 'home.ejs', locals:
+app.get '/populating', (req,res)->
+  login_required req, res, (current_user)->
+    res.render 'populating.ejs', locals:
       current_user:current_user
 
+app.get '/ready.json', (req,res)->
+  res.header 'Content-Type', 'application/json'
+  if req.session.user_id
+    Link.find().where('user_id':req.session.user_id).first (user)->
+      if user
+        res.send JSON.stringify(success:'Ready to go.')
+      else
+        res.send JSON.stringify(error:'Still working.'), 408
+  else
+    res.send JSON.stringify(error:'Not logged in.'), 401
+  
+
+app.get '/home', (req,res)->
+  login_required req, res, (current_user) ->
+    res.render 'home.ejs', 
+      locals:
+        current_user:current_user
+        
 app.get '/readability', (req, res)->
   if typeof(req.param('url')) == 'undefined'
     res.redirect 'home'
@@ -98,7 +112,6 @@ app.get '/readability', (req, res)->
 app.get '/feeds/:key', (req, res) ->
   User.find(key: req.params.key).first (user)->
     user.links (linkies)->
-      sys.puts sys.inspect(linkies)
       res.header 'Content-Type', 'application/atom+xml'      
       res.render 'atom.ejs',
         layout: false
@@ -111,9 +124,6 @@ app.get '/feeds/:key', (req, res) ->
 pollInterval = 3 # seconds
 setInterval ->
   since = new Date(new Date().getTime() - pollInterval * 1000)
-  User.fetchOutdated since
-, pollInterval * 1000
+  User.fetchOutdated since, pollInterval * 1000
 
 app.listen parseInt(process.env.PORT) || 3000
-
-
