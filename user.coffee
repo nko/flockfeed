@@ -18,7 +18,7 @@ mongo.mongoose.model 'User',
       this.find('id':id).first(callback)
     fetchOutdated:(since, callback)->
       self = this
-      self.find('last_fetched':{'$lte':since}).all (stale)->
+      self.find('last_fetched':{'$lte':since}).sort([['last_fetched',1]]).limit(parseInt(process.env.CONCURRENT_FETCHES) || 20).all (stale)->
         self.find().where('last_fetched',null).all (virgin)->
           users = stale.concat(virgin)
           for user in users
