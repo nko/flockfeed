@@ -50,7 +50,7 @@
     }));
   }
   app.get('/', function(req, res) {
-    return res.render('splash.ejs');
+    return req.session.user_id ? res.redirect('/home') : res.render('splash.ejs');
   });
   app.get('/sign_in', function(req, res) {
     return Twitter.consumer.getOAuthRequestToken(function(error, token, secret, url, params) {

@@ -48,7 +48,10 @@ else
   app.use express.errorHandler(showStack: true, dumpExceptions: true)
 
 app.get '/', (req,res)->
-  res.render 'splash.ejs'
+  if req.session.user_id
+    res.redirect '/home'
+  else
+    res.render 'splash.ejs'
 
 app.get '/sign_in', (req, res)->
   Twitter.consumer.getOAuthRequestToken (error, token, secret, url, params)->
