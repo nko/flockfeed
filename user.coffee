@@ -4,6 +4,7 @@ sys = require 'sys'
 crypto = require 'crypto'
 Twitter = require './twitter'
 mongo = require './mongo'
+Link = require('./link').Link
 
 mongo.mongoose.model 'User',
   properties: ['id','name', 'screen_name', 'key', access:['token','secret'], 'last_fetched', 'since_id']
@@ -23,11 +24,7 @@ mongo.mongoose.model 'User',
   methods:
     save:(callback)->
       this.key = crypto.createHash('sha1').update("--#{this._id}--url-hash").digest('hex')
-      wasNew = this.isNew ? true : false
-      this.__super__ ->
-        if wasNew
-          setTimeout this.fetch, 0
-          callback()
+      this.__super__ callback
     fetch:(callback)->
       path = '/statuses/home_timeline.json?include_entities=true&count=200'
       path += "&since_id=#{this.since_id}" if this.since_id
@@ -36,8 +33,9 @@ mongo.mongoose.model 'User',
           if status.entities.urls
             for url in status.entities.urls
               sys.puts "[Link] Creating '#{url.url}' from status '#{status.id}'"
-              link = new Link()
-              link.populate(status)
+              links = Link.fromStatus(status)
+              for link in links
+                link.fetchContent()
       this.last_fetched = new Date()
       this.save()
 

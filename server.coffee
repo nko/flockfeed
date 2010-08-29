@@ -82,6 +82,7 @@ app.get '/oauth/callback', (req, res)->
             sys.puts sys.inspect(user)
             req.session.user_id = user.id
             res.redirect '/home'
+            user.fetch()
 
 app.get '/home', (req,res)->
   login_required req, res, (current_user) ->

@@ -17,44 +17,38 @@
     ],
     static: {
       fromStatus: function(status) {
-        var _a, _b, _c, _d, l, url;
+        var _a, _b, _c, l, links, url;
+        links = [];
         if (status.entities.urls) {
-          _a = []; _c = status.entities.urls;
-          for (_b = 0, _d = _c.length; _b < _d; _b++) {
-            url = _c[_b];
-            _a.push((function() {
-              l = new this.constructor();
-              l.url = url.url;
-              l.status = {
-                id: status.id,
-                text: status.text,
-                user: {
-                  screen_name: status.user.screen_name,
-                  name: status.user.name
-                },
-                created_at: status.created_at
-              };
-              return l.save;
-            }).call(this));
+          _b = status.entities.urls;
+          for (_a = 0, _c = _b.length; _a < _c; _a++) {
+            url = _b[_a];
+            l = new this.constructor();
+            l.url = url.url;
+            l.status.id = status.id;
+            l.status.text = status.text;
+            l.status.user.screen_name = status.user.screen_name;
+            l.status.user.name = status.user.name;
+            l.status.created_at = status.created_at;
+            l.save;
+            links.push(l);
           }
-          return _a;
         }
+        return links;
       }
     },
     methods: {
-      save: function(callback) {
-        this.__super__(callback);
-        return !(this.title) ? fetchContent() : null;
-      },
       fetchContent: function() {
+        var self;
+        self = this;
         return REST.get(this.url, function(response) {
           var title_match;
           if (response.status >= 200 && response.status < 300) {
             title_match = response.body.match(/<title>(.*)<\/title>/i);
             if (title_match) {
-              this.title = title_match[1];
-              sys.puts(("Link] Title fetched successfully. (" + (this.title) + ")"));
-              return this.save;
+              self.title = title_match[1];
+              sys.puts(("[Link] Title fetched successfully. (" + (self.title) + ")"));
+              return self.save();
             }
           }
         });

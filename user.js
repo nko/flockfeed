@@ -1,10 +1,11 @@
 (function() {
-  var Twitter, crypto, mongo, sys;
+  var Link, Twitter, crypto, mongo, sys;
   require.paths.unshift('./vendor');
   sys = require('sys');
   crypto = require('crypto');
   Twitter = require('./twitter');
   mongo = require('./mongo');
+  Link = require('./link').Link;
   mongo.mongoose.model('User', {
     properties: [
       'id', 'name', 'screen_name', 'key', {
@@ -46,17 +47,8 @@
     },
     methods: {
       save: function(callback) {
-        var _a, wasNew;
         this.key = crypto.createHash('sha1').update(("--" + (this._id) + "--url-hash")).digest('hex');
-        wasNew = (typeof (_a = this.isNew) !== "undefined" && _a !== null) ? this.isNew : {
-          "true": false
-        };
-        return this.__super__(function() {
-          if (wasNew) {
-            setTimeout(this.fetch, 0);
-            return callback();
-          }
-        });
+        return this.__super__(callback);
       },
       fetch: function(callback) {
         var path;
@@ -65,7 +57,7 @@
           path += ("&since_id=" + (this.since_id));
         }
         this.client.get(path, function(statuses) {
-          var _a, _b, _c, _d, _e, _f, _g, _h, link, status, url;
+          var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, link, links, status, url;
           _a = []; _c = statuses;
           for (_b = 0, _d = _c.length; _b < _d; _b++) {
             status = _c[_b];
@@ -76,8 +68,13 @@
                   url = _g[_f];
                   _e.push((function() {
                     sys.puts(("[Link] Creating '" + (url.url) + "' from status '" + (status.id) + "'"));
-                    link = new Link();
-                    return link.populate(status);
+                    links = Link.fromStatus(status);
+                    _i = []; _k = links;
+                    for (_j = 0, _l = _k.length; _j < _l; _j++) {
+                      link = _k[_j];
+                      _i.push(link.fetchContent());
+                    }
+                    return _i;
                   })());
                 }
                 return _e;

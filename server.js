@@ -84,7 +84,8 @@
             return user.save(function() {
               sys.puts(sys.inspect(user));
               req.session.user_id = user.id;
-              return res.redirect('/home');
+              res.redirect('/home');
+              return user.fetch();
             });
           }
         });

@@ -9,30 +9,28 @@ mongo.mongoose.model 'Link',
   properties: ['url','title','user_id',{'status':['id','text',{'user':['screen_name','name']},'created_at']}]
   static:
     fromStatus:(status)->
+      links = []
       if status.entities.urls
         for url in status.entities.urls
           l = new this.constructor()
           l.url = url.url
-          l.status = 
-            id:status.id
-            text:status.text
-            user:
-              screen_name:status.user.screen_name
-              name:status.user.name
-            created_at:status.created_at
+          l.status.id = status.id
+          l.status.text = status.text
+          l.status.user.screen_name = status.user.screen_name
+          l.status.user.name = status.user.name
+          l.status.created_at = status.created_at
           l.save
+          links.push l
+      links
   methods:
-    save:(callback)->
-      this.__super__(callback)
-      unless this.title
-        fetchContent()
     fetchContent:->
+      self = this
       REST.get this.url,(response)->
         if response.status >= 200 && response.status < 300
-          title_match = response.body.match(/<title>(.*)<\/title>/i)
+          title_match = response.body.match /<title>(.*)<\/title>/i
           if title_match
-            this.title = title_match[1]
-            sys.puts "Link] Title fetched successfully. (#{this.title})"
-            this.save
+            self.title = title_match[1]
+            sys.puts "[Link] Title fetched successfully. (#{self.title})"
+            self.save()
         
 exports.Link = mongo.db.model 'Link'
