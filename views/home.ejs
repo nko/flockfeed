@@ -1,14 +1,18 @@
 <h1>Welcome, <%= current_user.name %>!</h1>
 
-<p>Below you can find the link to your personal Twitter RSS feed. Simply copy and paste the URL (or if you're using a browser like Firefox, just click through to the link and you can add it from the screen there).</p>
+<section id='feed_ready'>
+  <p>Below you can find the link to your personal Twitter RSS feed. Simply copy and paste the URL (or if you're using a browser like Firefox, just click through to the link and you can add it from the screen there).</p>
 
-<a id='rss_link' href='/feeds/<%= current_user.key %>'>http://flockfeeds.com/feeds/<%= current_user.key %></a>
+  <a id='rss_link' href='/feeds/<%= current_user.key %>'>http://flockfeeds.com/feeds/<%= current_user.key %></a>
 
-<ul class='readers'>
-    <li><a href='http://fusion.google.com/add?feedurl=http://flockfeeds.com/feeds/<%= current_user.key %>'>Google Reader</a></li>
-  <li><a href='http://add.my.yahoo.com/rss?url=http://flockfeeds.com/feeds/<%= current_user.key %>'>My Yahoo!</a></li>
-  <li><a href='http://www.newsgator.com/ngs/subscriber/subext.aspx?url=http://flockfeeds.com/feeds/<%= current_user.key %>'>NewsGator</a></li>
-  <li><a href='http://www.bloglines.com/sub/http://flockfeeds.com/feeds/<%= current_user.key %>'>Bloglines</a></li>
-  <li><a href='http://www.netvibes.com/subscribe.php?url=http://flockfeeds.com/feeds/<%= current_user.key %>'>NetVibes</a></li>
-  <li><a href='http://www.pageflakes.com/subscribe.aspx?url=http://flockfeeds.com/feeds/<%= current_user.key %>'>Pageflakes</a></li>
-</ul>
+  <h1 align='center'>Subscribe With Your Newsreader</h1>
+
+  <ul class='readers'>
+      <li><a href='http://fusion.google.com/add?feedurl=http://flockfeeds.com/feeds/<%= current_user.key %>'>Google Reader</a></li>
+    <li><a href='http://add.my.yahoo.com/rss?url=http://flockfeeds.com/feeds/<%= current_user.key %>'>My Yahoo!</a></li>
+    <li><a href='http://www.newsgator.com/ngs/subscriber/subext.aspx?url=http://flockfeeds.com/feeds/<%= current_user.key %>'>NewsGator</a></li>
+    <li><a href='http://www.bloglines.com/sub/http://flockfeeds.com/feeds/<%= current_user.key %>'>Bloglines</a></li>
+    <li><a href='http://www.netvibes.com/subscribe.php?url=http://flockfeeds.com/feeds/<%= current_user.key %>'>NetVibes</a></li>
+    <li><a href='http://www.pageflakes.com/subscribe.aspx?url=http://flockfeeds.com/feeds/<%= current_user.key %>'>Pageflakes</a></li>
+  </ul>
+</section>

@@ -46,21 +46,37 @@
         return links;
       }
     },
+    getters: {
+      xmlDate: function() {
+        var d;
+        d = new Date(Date.parse(this.status.created_at));
+        return "" + (d.getUTCFullYear()) + "-" + (d.getUTCMonth()) + "-" + (d.getUTCDate()) + "T" + (d.getUTCHours()) + ":" + (d.getUTCMinutes()) + ":" + (d.getUTCSeconds());
+      }
+    },
     methods: {
       fetchContent: function() {
         var self;
         try {
           self = this;
           return REST.get(this.url, function(response) {
-            var location;
+            var content_type, location;
             if (response.status >= 200 && response.status < 300) {
-              Logger.debug("Link", ("Fetched successfully (" + (self.url) + ")"));
-              return Content["for"](self, response.body, function(result) {
-                self.content = result.content;
-                self.title = result.title;
-                Logger.debug("Link", ("Content parsed successfully. (" + (self.title) + ")"));
+              content_type = response.headers['Content-Type'] || response.headers['content-type'];
+              Logger.debug("Link", ("Content Type: " + (content_type)));
+              if (content_type.indexOf('image') > 0) {
+                self.content = ("<body><p><img src='" + (res.body) + "'></p></body>");
                 return self.save();
-              });
+              } else if (content_type.indexOf('text/html') >= 0) {
+                Logger.debug("Link", ("Fetched successfully (" + (self.url) + ")"));
+                return Content["for"](self, response.body, function(result) {
+                  self.content = result.content;
+                  self.title = result.title;
+                  return self.save();
+                });
+              } else {
+                self.content = '';
+                return self.save();
+              }
             } else if ([300, 301, 302, 303, 305, 307].indexOf(response.status) !== -1 && self.redirects <= 3) {
               location = response.headers['Location'] || response.headers['location'];
               Logger.debug("Link", ("" + (self.url) + " is a redirect, following to " + (location)));

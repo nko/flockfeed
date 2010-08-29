@@ -30,15 +30,21 @@
     format: ':method :url [:status] (:response-time ms)'
   }));
   app.set('view engine', 'ejs');
-  app.error(function(err, req, res, next) {
-    if (process.env.RACK_ENV === 'production') {
+  if (process.env.RACK_ENV === 'production') {
+    app.error(function(err, req, res, next) {
       hoptoad.key = '63da924b138bae57d1066c46accddbe7';
       hoptoad.notify(err);
-    }
-    return res.render('error.ejs', {
-      status: 500
+      res.header('Content-Type', 'text/html');
+      return res.render('error.ejs', {
+        status: 500
+      });
     });
-  });
+  } else {
+    app.use(express.errorHandler({
+      showStack: true,
+      dumpExceptions: true
+    }));
+  }
   app.get('/', function(req, res) {
     return res.render('splash.ejs');
   });
@@ -61,7 +67,9 @@
     return Twitter.consumer.getOAuthAccessToken(req.session['req.token'], req.session['req.secret'], function(error, access_token, access_secret, params) {
       var twitter;
       if (error) {
-        throw error;
+        Logger.error('Twitter', "Couldn't retrieve access token.");
+        res.redirect('/');
+        return null;
       }
       twitter = new Twitter.client(access_token, access_secret);
       return twitter.get('/account/verify_credentials.json', function(hash) {

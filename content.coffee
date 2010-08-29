@@ -32,6 +32,9 @@ Content.addHandler /youtu\.be\/(.*)\??/i, (match)->
   
 Content.addHandler /twitpic\.com\/(.*)\??/i, (match)->
   "<p><a href='#{this.url}'><img src='http://twitpic.com/show/large/#{match[1]}'/></a></p>"
+
+Content.addHandler /yfrog\.com\/(.*)\??/i, (match)->
+  "<p><a href='#{this.url}'><img src='http://yfrog.com/#{match[1]}.th.jpg'/></a></p>"
   
 Content.addHandler /twitter\/.com\/.*\/statuses\/([0-9]+)/i, (match)->
   "<p><a href='#{this.url}'><img src='http://twictur.es/i/#{match[1]}'/></a></p>"

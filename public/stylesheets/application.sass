@@ -230,3 +230,22 @@ body.announcement
 .error .message
   +impression
   padding: 20px
+  
+ul.readers
+  text-align: center
+  li
+    display: inline-block
+    a
+      display: inline-block
+      +vertical-gradient(#555,#333,#444)
+      color: white
+      font-weight: bold
+      font-family: Helvetica, Arial, sans-serif
+      font-size: 18px
+      text-decoration: none
+      padding: 8px 14px
+      +border-radius(4px)
+      +box-shadow(0,2px,7px,rgba(0,0,0,0.3))
+      border: 1px solid #333
+      &:hover
+        +vertical-gradient(#380,#160,#270)

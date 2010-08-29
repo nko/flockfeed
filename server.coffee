@@ -31,14 +31,17 @@ login_required = (req, res, success_callback) ->
 app = express.createServer connect.cookieDecoder(), connect.session(), express.staticProvider(__dirname + '/public'), express.logger({ format: ':method :url [:status] (:response-time ms)' })
 app.set 'view engine', 'ejs'
 
-app.error (err,req,res,next)->
-  if process.env.RACK_ENV == 'production'
+if process.env.RACK_ENV == 'production'
+  app.error (err,req,res,next)->
     hoptoad.key = '63da924b138bae57d1066c46accddbe7'
     hoptoad.notify(err)
   
-  res.render 'error.ejs',
-    status: 500
-
+    res.header 'Content-Type', 'text/html'
+    res.render 'error.ejs',
+      status: 500
+else
+  app.use express.errorHandler(showStack: true, dumpExceptions: true)
+  
 app.get '/', (req,res)->
   res.render 'splash.ejs'
 
@@ -57,7 +60,11 @@ app.get '/oauth/callback', (req, res)->
     return
 
   Twitter.consumer.getOAuthAccessToken req.session['req.token'], req.session['req.secret'], (error, access_token, access_secret, params)->
-    throw error if error
+    if error
+      Logger.error 'Twitter', "Couldn't retrieve access token."
+      res.redirect('/')
+      return
+      
     twitter = new Twitter.client(access_token, access_secret)
 
     twitter.get '/account/verify_credentials.json', (hash)->

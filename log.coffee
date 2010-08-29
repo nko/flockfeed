@@ -25,7 +25,7 @@ mongo.mongoose.model 'Log',
       this.log 'debug',cat,msg,ld,fn
     warn: (cat,msg,ld,fn)-> 
       this.log 'warn',cat,msg,ld,fn
-    error: (cat,msg,ld,fn)-> 
+    err: (cat,msg,ld,fn)-> 
       this.log 'error',cat,msg,ld,fn
     fetch:(level,category,fn)->
       if !fn and !category

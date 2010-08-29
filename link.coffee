@@ -27,19 +27,31 @@ mongo.mongoose.model 'Link',
           l.save
           links.push l
       links
+  getters:
+    xmlDate:->
+      d = new Date(Date.parse(this.status.created_at))
+      "#{d.getUTCFullYear()}-#{d.getUTCMonth()}-#{d.getUTCDate()}T#{d.getUTCHours()}:#{d.getUTCMinutes()}:#{d.getUTCSeconds()}"
   methods:
     fetchContent:->
       try
         self = this
-        REST.get this.url,(response)->
+        REST.get this.url,(response)->      
           if response.status >= 200 && response.status < 300
-            Logger.debug "Link", "Fetched successfully (#{self.url})"
-            Content.for self, response.body, (result)->
-              self.content = result.content
-              self.title = result.title
-              Logger.debug "Link", "Content parsed successfully. (#{self.title})"
+            content_type = response.headers['Content-Type'] || response.headers['content-type']
+            Logger.debug "Link", "Content Type: #{content_type}"
+            if content_type.indexOf('image') > 0
+              self.content = "<body><p><img src='#{res.body}'></p></body>"
               self.save()
-
+            else if content_type.indexOf('text/html') >= 0
+              Logger.debug "Link", "Fetched successfully (#{self.url})"
+              Content.for self, response.body, (result)->
+                self.content = result.content
+                self.title = result.title
+                self.save()
+            else
+              self.content = ''
+              self.save()
+              
           # Follow redirects to their source!
           else if [300,301,302,303,305,307].indexOf(response.status) != -1 and self.redirects <= 3
             location = response.headers['Location'] || response.headers['location']

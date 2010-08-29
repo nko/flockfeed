@@ -37,7 +37,7 @@
       warn: function(cat, msg, ld, fn) {
         return this.log('warn', cat, msg, ld, fn);
       },
-      error: function(cat, msg, ld, fn) {
+      err: function(cat, msg, ld, fn) {
         return this.log('error', cat, msg, ld, fn);
       },
       fetch: function(level, category, fn) {

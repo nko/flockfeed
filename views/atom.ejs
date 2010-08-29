@@ -4,7 +4,8 @@
   <title>@<%= user.screen_name %>'s FlockFeed</title> 
   <link href='http://flockfeeds.com/feeds/<%= user.key %>' rel='self'/>
   <link href='http://flockfeeds.com'/>
-  <updated><%= links[0].status.created_at %></updated>
+  <link rel='hub' href='http://flockfeeds.superfeedr.com'/>
+  <updated><% if (links[0]) { %><%= links[0].xmlDate %><% } %></updated>
   <id>urn:uuid:flockfeed:<%= user.key %></id>
   <author>
     <name>FlockFeeds</name>
@@ -15,7 +16,7 @@
      <id>urn:uuid:<%= links[i].status.id %></id>
      <title><%= links[i].title || links[i].status.text %></title> 
      <link href='<%= links[i].url %>' type='text/html'/>
-     <updated><%= links[i].status.created_at %></updated>
+     <updated><%= links[i].xmlDate %></updated>
      <content type='html'>
       <%= "<div style='padding: 6px; min-height: 24px; background: #def;'><img src='http://img.tweetimag.es/i/" + links[i].status.user.screen_name + "_m' style='float: left; margin-right: 10px;'/> <b>" + links[i].status.user.screen_name + ":</b>_<span>" + links[i].status.text + "</span></div>" %>
       <% if(links[i].content && links[i].content.length > 0) { %>
