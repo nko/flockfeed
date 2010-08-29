@@ -8,6 +8,7 @@ body
   font-family: "Lucida Grande", "Lucida Sans", sans-serif
   background: #104D84
   +vertical-gradient(rgba(0,0,0,0),rgba(0,0,0,0.4),#104d84)
+  color: #333
 
 a
   color: black
@@ -34,8 +35,18 @@ a
   +vertical-gradient(rgba(0,0,0,0),rgba(0,0,0,0.2),#fff)
   padding: 20px
   +box-shadow(0,10px,10px,rgba(0,0,0,0.3))
+  h1, h2, h3
+    font-family: Helvetica, Arial, sans-serif
+    color: #222
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.2)  
   > h1:first-child
-    :margin-top 0
+    +vertical-gradient(#444,#222,#333)
+    color: white
+    margin: -20px -20px 20px
+    padding: 8px 16px
+    +box-shadow(0px,2px,8px,rgba(0,0,0,0.3))
+  > p
+    line-height: 140%
   
 #content_top
   +vertical-gradient(#ccc,#999)
@@ -51,3 +62,43 @@ a
   padding: 6px 0
   font-size: 12px
   text-shadow: 1px 1px 1px rgba(255,255,255,0.2)
+
+=impression
+  +vertical-gradient(#ccc,#aaa,#bbb)
+  +border-radius(10px)
+#sign_in
+  padding: 15px
+  text-align: center
+  +impression
+  aside
+    line-height: 80px
+    display: inline-block
+    font-size: 32px
+    font-family: Helvetica, Arial, sans-serif
+    margin-right: 20px
+    letter-spacing: -0.05em
+  aside, img
+    vertical-align: middle
+    
+article.person
+  clear: left
+  margin-bottom: 10px
+  +vertical-gradient(#eee,#ccc,#ddd)
+  +border-radius(10px)
+  +box-shadow(1px,1px,5px,rgba(0,0,0,0.2))
+  padding: 15px
+  height: 114px
+  h1
+    font-size: 30px
+    margin: 0 0 5px 0
+  img
+    width: 120px
+    height: 104px
+    border: 6px solid white
+    +box-shadow(2px,2px,8px,rgba(0,0,0,0.3))
+    float: left
+    margin-right: 15px
+  p
+    margin: 10px 0 0
+    line-height: 140%
+    font-size: 14px

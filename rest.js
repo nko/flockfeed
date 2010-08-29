@@ -4,14 +4,12 @@
   url = require('url');
   Client = {
     request: function(method, request_url, callback) {
-      var client, request, res, uri, headers;
+      var client, request, res, uri;
       uri = url.parse(request_url);
-      headers = {
-        host: uri.hostname,
-        'User-Agent': 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en-US; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8'
-      }
       client = http.createClient(uri.port || 80, uri.hostname);
-      request = client.request(method, uri.pathname, headers);
+      request = client.request(method, uri.pathname, {
+        host: uri.hostname
+      });
       request.end();
       res = {
         body: ''
