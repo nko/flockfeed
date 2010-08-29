@@ -17,19 +17,30 @@ body {
 a {
   color: black;
   font-weight: bold; }
+  a img {
+    border: 0; }
 
 #wrapper {
   margin: 0 auto;
   width: 960px; }
 
 #top {
+  width: 960px;
+  margin: 0 auto;
   text-align: center; }
+  #top > a {
+    display: inline-block;
+    padding-top: 1px; }
+    #top > a img {
+      margin-top: 15px;
+      vertical-align: middle; }
   #top h1 {
     margin: 0;
     padding: 0;
-    display: inline-block; }
+    display: inline-block;
+    vertical-align: middle; }
     #top h1 a {
-      display: block;
+      display: inline-block;
       background: url(/images/logo.png);
       width: 470px;
       height: 150px;
