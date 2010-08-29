@@ -13,8 +13,8 @@
     static: {
       log: function(level, category, message, payload, fn) {
         var l;
-        if (process.env.RACK_ENV !== 'production') {
-          sys.puts("[" + (category) + "] " + (message));
+        if (!(process.env.RACK_ENV === 'production')) {
+          sys.puts(("[" + (category) + "] " + (message)));
         }
         l = new this.constructor();
         l.level = level;

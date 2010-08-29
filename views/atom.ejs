@@ -16,7 +16,7 @@
      <title><%= links[i].title || links[i].status.text %></title> 
      <link href='<%= links[i].url %>' type='text/html'/>
      <updated><%= links[i].status.created_at %></updated>
-     <content>
+     <content type='html'>
       <%= "<div style='padding: 6px; min-height: 24px; background: #def;'><img src='http://img.tweetimag.es/i/" + links[i].status.user.screen_name + "_m' style='float: left; margin-right: 10px;'/> <b>" + links[i].status.user.screen_name + ":</b>_<span>" + links[i].status.text + "</span></div>" %>
       <% if(links[i].content && links[i].content.length > 0) { %>
         <%= links[i].content %>

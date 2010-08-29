@@ -1,5 +1,5 @@
 (function() {
-  var Logger, REST, Readability, Twitter, User, app, connect, ejs, express, hoptoad, login_required, pp, sys, url;
+  var Logger, REST, Readability, Twitter, User, app, connect, ejs, express, hoptoad, login_required, pollInterval, pp, sys, url, work;
   require.paths.unshift('./vendor');
   require('express');
   sys = require('sys');
@@ -46,7 +46,7 @@
       } else {
         req.session['req.token'] = token;
         req.session['req.secret'] = secret;
-        return res.redirect("http://api.twitter.com/oauth/authenticate?oauth_token=" + (token));
+        return res.redirect(("http://api.twitter.com/oauth/authenticate?oauth_token=" + (token)));
       }
     });
   });
@@ -160,5 +160,22 @@
       });
     });
   });
+  pollInterval = 30;
+  work = function() {
+    return process.nextTick(function() {
+      var since;
+      try {
+        Logger.info("Worker", "Refreshing feeds...");
+        since = new Date(new Date().getTime() - pollInterval * 1000);
+        return User.fetchOutdated(since, function() {
+          Logger.info("Worker", ("Finished, starting again in " + (pollInterval) + " seconds."));
+          return setTimeout(work, pollInterval * 1000);
+        });
+      } catch (error) {
+        return Logger.warn("Worker", "Caught exception trying to refetch.");
+      }
+    });
+  };
+  work();
   app.listen(parseInt(process.env.PORT) || 3000);
 })();
