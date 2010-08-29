@@ -2,11 +2,13 @@ require.paths.unshift('./vendor')
 
 REST = require('./rest').Client
 sys = require 'sys'
+Logger = require('./log').Logger
 Twitter = require './twitter'
 mongo = require('./mongo')
 
 mongo.mongoose.model 'Link',
   properties: ['url','redirects','title','user_id',{'status':['id','text',{'user':['screen_name','name']},'created_at']}]
+  indexes:['user_id',{'status.created_at':-1}]
   static:
     fromStatus:(user, status)->
       links = []
@@ -32,17 +34,18 @@ mongo.mongoose.model 'Link',
             title_match = response.body.match /<title>(.*)<\/title>/mi
             if title_match
               self.title = title_match[1].replace(/^\s+|\s+$/g, '')
-              sys.puts "[Link] Title fetched successfully. (#{self.title})"
+              Logger.debug "Link", "Title fetched successfully. (#{self.title})"
               self.save()
           # Follow redirects to their source!
-          else if response.status >= 300 && response.status < 400 and self.redirects <= 3
+          else if [300,301,302,303,305,307].indexOf(response.status) != -1 and self.redirects <= 3
             location = response.headers['Location'] || response.headers['location']
-            sys.puts "[Link] #{self.url} is a redirect, following to #{location}"
+            Logger.debug "Link", "#{self.url} is a redirect, following to #{location}"
             self.url = location
             self.redirects ||= 0
             self.redirects += 1
             self.save ->
               self.fetchContent()
       catch error
-        sys.puts "[Link] #{self.url} could not be fetched."
+        Logger.warn "Link", "#{self.url} could not be fetched."
+        
 exports.Link = mongo.db.model 'Link'

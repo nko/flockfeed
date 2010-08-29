@@ -7,6 +7,7 @@ url = require 'url'
 connect = require 'connect'
 express = require 'express'
 ejs = require 'ejs'
+Logger = require('./log').Logger
 Twitter = require './twitter'
 User = require('./user').User
 REST = require('./rest').Client
@@ -56,14 +57,13 @@ app.get '/oauth/callback', (req, res)->
     twitter = new Twitter.client(access_token, access_secret)
 
     twitter.get '/account/verify_credentials.json', (hash)->
-      sys.puts "Creating user in Mongo..."
       User.find().where('id',hash.id).first (user)->
         if user
-          sys.puts "[User] Existing user logged in."
+          Logger.info "User", "Existing user logged in."
           req.session.user_id = user.id
           res.redirect '/home'
         else
-          sys.puts "[User] Creating new user."
+          Logger.info "User", "Creating new user."
           user = new User()
           user.id = hash.id
           user.screen_name = hash.screen_name
@@ -121,9 +121,17 @@ app.get '/feeds/:key', (req, res) ->
 
 
 # periodically fetch user timelines
-pollInterval = 3 # seconds
-setInterval ->
-  since = new Date(new Date().getTime() - pollInterval * 1000)
-  User.fetchOutdated since, pollInterval * 1000
+pollInterval = 300 # seconds
+work = ->
+  process.nextTick ->
+    try
+      Logger.info "Worker", "Refreshing feeds..."
+      since = new Date(new Date().getTime() - pollInterval * 1000)
+      User.fetchOutdated since, ->
+        Logger.info "Worker", "Finished, starting again in #{pollInterval} seconds."
+        setTimeout work, pollInterval * 1000
+    catch error
+      Logger.warn "Worker", "Caught exception trying to refetch."
+work()
 
 app.listen parseInt(process.env.PORT) || 3000

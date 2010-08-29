@@ -1,6 +1,7 @@
 require.paths.unshift('./vendor')
 
 sys = require 'sys'
+Logger = require('./log').Logger
 crypto = require 'crypto'
 Twitter = require './twitter'
 mongo = require './mongo'
@@ -14,13 +15,14 @@ mongo.mongoose.model 'User',
   static:
     findById:(id, callback)->
       this.find('id':id).first(callback)
-    fetchOutdated:(since)->
+    fetchOutdated:(since, callback)->
       self = this
       self.find('last_fetched':{'$lt':since}).all (stale)->
         self.find().where('last_fetched',null).all (virgin)->
           users = stale.concat(virgin)
           for user in users
             user.fetch()
+          callback()
     fetch:(id)->
       this.findById id,(user)->
         user.fetch()
@@ -46,7 +48,7 @@ mongo.mongoose.model 'User',
         for status in statuses
           if status.entities.urls
             for url in status.entities.urls
-              sys.puts "[Link] Creating '#{url.url}' from status '#{status.id}'"
+              Logger.debug "Link", "Creating '#{url.url}' from status '#{status.id}'"
               links = Link.fromStatus(self,status)
               for link in links
                 link.fetchContent()

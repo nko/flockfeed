@@ -1,7 +1,8 @@
 (function() {
-  var Link, Twitter, crypto, mongo, sys;
+  var Link, Logger, Twitter, crypto, mongo, sys;
   require.paths.unshift('./vendor');
   sys = require('sys');
+  Logger = require('./log').Logger;
   crypto = require('crypto');
   Twitter = require('./twitter');
   mongo = require('./mongo');
@@ -24,7 +25,7 @@
           'id': id
         }).first(callback);
       },
-      fetchOutdated: function(since) {
+      fetchOutdated: function(since, callback) {
         var self;
         self = this;
         return self.find({
@@ -33,14 +34,14 @@
           }
         }).all(function(stale) {
           return self.find().where('last_fetched', null).all(function(virgin) {
-            var _a, _b, _c, _d, user, users;
+            var _a, _b, _c, user, users;
             users = stale.concat(virgin);
-            _a = []; _c = users;
-            for (_b = 0, _d = _c.length; _b < _d; _b++) {
-              user = _c[_b];
-              _a.push(user.fetch());
+            _b = users;
+            for (_a = 0, _c = _b.length; _a < _c; _a++) {
+              user = _b[_a];
+              user.fetch();
             }
-            return _a;
+            return callback();
           });
         });
       },
@@ -88,7 +89,7 @@
                 for (_f = 0, _h = _g.length; _f < _h; _f++) {
                   url = _g[_f];
                   _e.push((function() {
-                    sys.puts(("[Link] Creating '" + (url.url) + "' from status '" + (status.id) + "'"));
+                    Logger.debug("Link", ("Creating '" + (url.url) + "' from status '" + (status.id) + "'"));
                     links = Link.fromStatus(self, status);
                     _i = []; _k = links;
                     for (_j = 0, _l = _k.length; _j < _l; _j++) {
