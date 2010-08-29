@@ -10,6 +10,7 @@ ejs = require 'ejs'
 Logger = require('./log').Logger
 Twitter = require './twitter'
 User = require('./user').User
+Link = require('./link').Link
 REST = require('./rest').Client
 Readability = require('./readability').Client
 hoptoad = require('hoptoad-notifier').Hoptoad
@@ -87,7 +88,7 @@ app.get '/oauth/callback', (req, res)->
           user.access.secret = access_secret
           user.save ->
             req.session.user_id = user.id
-            res.redirect '/home'
+            res.redirect '/home?new=true'
             process.nextTick ->
               user.fetch()
 
@@ -110,9 +111,13 @@ app.get '/ready.json', (req,res)->
 
 app.get '/home', (req,res)->
   login_required req, res, (current_user) ->
-    res.render 'home.ejs', 
-      locals:
-        current_user:current_user
+    Link.find('user_id':current_user.id).first (link)->
+      if link
+        res.render 'home.ejs', 
+          locals:
+            current_user:current_user
+      else
+        res.render 'populating.ejs'
   
 Content = require('./content').Content
 app.get '/readability', (req, res)->

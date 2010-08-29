@@ -1,19 +1,23 @@
-<!DOCTYPE html>
+<h1>Populating Your FlockFeed...</h1>
 
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>FlockFeeds - Populating Your FlockFeed...</title>
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
-    <link rel='stylesheet' href='/stylesheets/application.css'/>
-  </head>
-  <body id='loading'>
-    <div>
-      <img src='/images/big_logo.png' alt='FlockFeeds Logo'/>
-      <hgroup>
-        <h1>Populating your feed...</h1>
-        <h2>We're getting your feed ready...just a moment!</h2>
-      </hgroup>
-    </div>
-  </body>
-</html>
+<p align='center'><img src='/images/big_logo.png'/></p>
+
+<h1 align='center'>Just a Moment<span class='dots'>...</span></h1>
+
+<p class='impression'>We're busy creating your FlockFeed, just give us a few moments and you will automatically be redirected. If you don't get redirected after 30 seconds, just hit refresh!</p>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    var dots = ['.','..','...']
+    var dotCount = 2
+    setInterval(function() {
+      dotCount += 1;
+      if (dotCount > 2) dotCount = 0;
+      $('span.dots').text(dots[dotCount]);
+    }, 500);
+    
+    setTimeout(function() {
+      window.location.reload(true);
+    }, 3000);
+  });
+</script>

@@ -1,5 +1,5 @@
 (function() {
-  var Content, Logger, REST, Readability, Twitter, User, app, connect, ejs, express, hoptoad, login_required, pollInterval, pp, sys, url, work;
+  var Content, Link, Logger, REST, Readability, Twitter, User, app, connect, ejs, express, hoptoad, login_required, pollInterval, pp, sys, url, work;
   require.paths.unshift('./vendor');
   require('express');
   sys = require('sys');
@@ -10,6 +10,7 @@
   Logger = require('./log').Logger;
   Twitter = require('./twitter');
   User = require('./user').User;
+  Link = require('./link').Link;
   REST = require('./rest').Client;
   Readability = require('./readability').Client;
   hoptoad = require('hoptoad-notifier').Hoptoad;
@@ -91,7 +92,7 @@
             user.access.secret = access_secret;
             return user.save(function() {
               req.session.user_id = user.id;
-              res.redirect('/home');
+              res.redirect('/home?new=true');
               return process.nextTick(function() {
                 return user.fetch();
               });
@@ -126,10 +127,14 @@
   });
   app.get('/home', function(req, res) {
     return login_required(req, res, function(current_user) {
-      return res.render('home.ejs', {
-        locals: {
-          current_user: current_user
-        }
+      return Link.find({
+        'user_id': current_user.id
+      }).first(function(link) {
+        return link ? res.render('home.ejs', {
+          locals: {
+            current_user: current_user
+          }
+        }) : res.render('populating.ejs');
       });
     });
   });

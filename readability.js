@@ -15,7 +15,12 @@
   var Client = {
     parse: function(content, callback) {
       document.innerHTML = content;
-
+      
+      if (!document.body) {
+        callback({content:'',title:''});
+        return;
+      }
+      
     	// Replace all doubled-up <BR> tags with <P> tags, and remove fonts.
     	var pattern =  new RegExp ("<br/?>[ \r\n\s]*<br/?>", "g");
     	document.body.innerHTML = document.body.innerHTML.replace(pattern, "</p><p>").replace(/<\/?font[^>]*>/g, '');
