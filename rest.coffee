@@ -20,6 +20,7 @@ Client =
       response.on 'end',->
         callback res
     request.on 'error',(error)->
+      Logger.err 'HTTP', "Fetching of #{request_url} failed"
       callback null
 
   get:(url,callback)->

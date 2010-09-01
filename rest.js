@@ -27,6 +27,7 @@
         });
       });
       return request.on('error', function(error) {
+        Logger.err('HTTP', ("Fetching of " + (request_url) + " failed"));
         return callback(null);
       });
     },
