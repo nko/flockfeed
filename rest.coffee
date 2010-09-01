@@ -19,6 +19,8 @@ Client =
         res.body += chunk
       response.on 'end',->
         callback res
+    request.on 'error',(error)->
+      callback null
 
   get:(url,callback)->
     this.request 'GET', url, callback

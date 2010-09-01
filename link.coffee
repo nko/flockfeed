@@ -27,6 +27,32 @@ mongo.mongoose.model 'Link',
           l.save
           links.push l
       links
+    generateWelcome:(user,callback)->
+      l = new this.constructor(
+        user_id:user.id
+        url:'http://flockfeeds.com/home'
+        status:
+          id:1
+          text:"Welcome to FlockFeeds!"
+          user:
+            screen_name:'flockfeeds'
+            name:'FlockFeeds'
+        content:'''
+                <p>Welcome to your FlockFeed! This should soon be filled with
+                a myriad of interesting links pulled directly from the people
+                you follow.</p>
+                
+                <p>Your FlockFeed will continue to update indefinitely without
+                you having to do any more work. However, if you happen to lose
+                the link, you can always head back to 
+                <a href='http://flockfeeds.com'>the FlockFeeds site</a> and log
+                back in to retrieve it.</p>
+                
+                <p>Thanks for signing up, and we hope you enjoy your feed!</p>
+                '''
+      )
+      l.save ->
+        callback()
   getters:
     xmlDate:->
       d = new Date(Date.parse(this.status.created_at))
@@ -35,7 +61,12 @@ mongo.mongoose.model 'Link',
     fetchContent:->
       try
         self = this
-        REST.get this.url,(response)->      
+        REST.get this.url,(response)->
+          unless response
+            self.content = ''
+            self.save()
+            return
+            
           if response.status >= 200 && response.status < 300
             content_type = response.headers['Content-Type'] || response.headers['content-type']
             Logger.debug "Link", "Content Type: #{content_type}"

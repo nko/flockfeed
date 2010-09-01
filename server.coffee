@@ -92,36 +92,16 @@ app.get '/oauth/callback', (req, res)->
           user.save ->
             req.session.user_id = user.id
             res.redirect '/home?new=true'
-            process.nextTick ->
-              user.fetch()
-
-app.get '/populating', (req,res)->
-  login_required req, res, (current_user)->
-    res.render 'populating.ejs', locals:
-      current_user:current_user
-
-app.get '/ready.json', (req,res)->
-  res.header 'Content-Type', 'application/json'
-  if req.session.user_id
-    Link.find().where('user_id':req.session.user_id).first (user)->
-      if user
-        res.send JSON.stringify(success:'Ready to go.')
-      else
-        res.send JSON.stringify(error:'Still working.'), 408
-  else
-    res.send JSON.stringify(error:'Not logged in.'), 401
-
+            Link.generateWelcome user, ->
+              process.nextTick ->
+                user.fetch()
 
 app.get '/home', (req,res)->
   login_required req, res, (current_user) ->
-    Link.find('user_id':current_user.id).first (link)->
-      if link
-        res.render 'home.ejs', 
-          locals:
-            current_user:current_user
-      else
-        res.render 'populating.ejs'
-  
+    res.render 'home.ejs', 
+      locals:
+        current_user:current_user
+      
 Content = require('./content').Content
 app.get '/readability', (req, res)->
   if typeof(req.param('url')) == 'undefined'
@@ -129,10 +109,11 @@ app.get '/readability', (req, res)->
     return
 
   REST.get req.param('url'), (response)->
-    Content.for {url:req.param('url')}, response.body, (result)->
+    Content.for {url:req.param('url'), status:{text:"Example Status Text"}}, response.body, (result)->
       res.render 'readability.ejs', locals:
         content: result.content
         url: req.param('url')
+        title: result.title
 
 app.get '/feeds/:key', (req, res) ->
   User.find(key:req.params.key).first (user)->

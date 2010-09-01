@@ -15,7 +15,7 @@
       res = {
         body: ''
       };
-      return request.on('response', function(response) {
+      request.on('response', function(response) {
         res.status = response.statusCode;
         res.headers = response.headers;
         response.setEncoding('utf8');
@@ -25,6 +25,9 @@
         return response.on('end', function() {
           return callback(res);
         });
+      });
+      return request.on('error', function(error) {
+        return callback(null);
       });
     },
     get: function(url, callback) {

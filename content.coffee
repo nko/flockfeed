@@ -15,7 +15,11 @@ Content =
       match = domain.exec link.url
       if match
         Logger.debug "Content", "Matched #{domain}"
-        return fn(Content.handlers[domain].call(link, match))
+        ret = Content.handlers[domain].call(link, match)
+        return fn(
+          content:ret.content
+          title:ret.title || Content.title(body)
+        )
     Readability.parse body, (result)->
       if result
         Logger.debug "Link", "Content parsed successfully. (#{link.url})"
@@ -23,21 +27,30 @@ Content =
       else
         Logger.debug "Link", "Could not parse content of #{link.url}"
         fn({ content: '', title: '' })
+  title:(body)->
+    m = body.match /<title>\s*(.*)\s*<\/title>/mi
+    if m
+      m[1]
+    else
+      ""
 
 Content.addHandler /youtube\.com\/watch.*[?&]v=([^&]+)/i, (match)->
-  YouTube.player(match[1])
+  content: YouTube.player(match[1])
+  title: this.status.text
 
 Content.addHandler /youtu\.be\/(.*)\??/i, (match)->
-  YouTube.player(match[1])
+  content: YouTube.player(match[1])
+  title: this.status.text
   
 Content.addHandler /twitpic\.com\/(.*)\??/i, (match)->
-  "<p><a href='#{this.url}'><img src='http://twitpic.com/show/large/#{match[1]}'/></a></p>"
+  content:"<p><a href='#{this.url}'><img src='http://twitpic.com/show/large/#{match[1]}'/></a></p>"
 
 Content.addHandler /yfrog\.com\/(.*)\??/i, (match)->
-  "<p><a href='#{this.url}'><img src='http://yfrog.com/#{match[1]}.th.jpg'/></a></p>"
+  content:"<p><a href='#{this.url}'><img src='http://yfrog.com/#{match[1]}.th.jpg'/></a></p>"
   
 Content.addHandler /twitter\/.com\/.*\/statuses\/([0-9]+)/i, (match)->
-  "<p><a href='#{this.url}'><img src='http://twictur.es/i/#{match[1]}'/></a></p>"
+  content:"<p><a href='#{this.url}'><img src='http://twictur.es/i/#{match[1]}'/></a></p>"
+  title: this.status.text
   
 YouTube =
   player:(youtube_id)->

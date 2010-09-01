@@ -1,4 +1,6 @@
-<% if(content.length == 0) { %>
+<h1><%= title %></h1>
+
+<% if(!content||content.length == 0) { %>
   <a href="<%= url %>"><%= url %></a>
 <% } else { %>
   <%- content %>

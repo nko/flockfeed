@@ -93,8 +93,10 @@
             return user.save(function() {
               req.session.user_id = user.id;
               res.redirect('/home?new=true');
-              return process.nextTick(function() {
-                return user.fetch();
+              return Link.generateWelcome(user, function() {
+                return process.nextTick(function() {
+                  return user.fetch();
+                });
               });
             });
           }
@@ -102,39 +104,12 @@
       });
     });
   });
-  app.get('/populating', function(req, res) {
+  app.get('/home', function(req, res) {
     return login_required(req, res, function(current_user) {
-      return res.render('populating.ejs', {
+      return res.render('home.ejs', {
         locals: {
           current_user: current_user
         }
-      });
-    });
-  });
-  app.get('/ready.json', function(req, res) {
-    res.header('Content-Type', 'application/json');
-    return req.session.user_id ? Link.find().where({
-      'user_id': req.session.user_id
-    }).first(function(user) {
-      return user ? res.send(JSON.stringify({
-        success: 'Ready to go.'
-      })) : res.send(JSON.stringify({
-        error: 'Still working.'
-      }), 408);
-    }) : res.send(JSON.stringify({
-      error: 'Not logged in.'
-    }), 401);
-  });
-  app.get('/home', function(req, res) {
-    return login_required(req, res, function(current_user) {
-      return Link.find({
-        'user_id': current_user.id
-      }).first(function(link) {
-        return link ? res.render('home.ejs', {
-          locals: {
-            current_user: current_user
-          }
-        }) : res.render('populating.ejs');
       });
     });
   });
@@ -146,12 +121,16 @@
     }
     return REST.get(req.param('url'), function(response) {
       return Content["for"]({
-        url: req.param('url')
+        url: req.param('url'),
+        status: {
+          text: "Example Status Text"
+        }
       }, response.body, function(result) {
         return res.render('readability.ejs', {
           locals: {
             content: result.content,
-            url: req.param('url')
+            url: req.param('url'),
+            title: result.title
           }
         });
       });

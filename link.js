@@ -44,6 +44,25 @@
           }
         }
         return links;
+      },
+      generateWelcome: function(user, callback) {
+        var l;
+        l = new this.constructor({
+          user_id: user.id,
+          url: 'http://flockfeeds.com/home',
+          status: {
+            id: 1,
+            text: "Welcome to FlockFeeds!",
+            user: {
+              screen_name: 'flockfeeds',
+              name: 'FlockFeeds'
+            }
+          },
+          content: '<p>Welcome to your FlockFeed! This should soon be filled with\na myriad of interesting links pulled directly from the people\nyou follow.</p>\n\n<p>Your FlockFeed will continue to update indefinitely without\nyou having to do any more work. However, if you happen to lose\nthe link, you can always head back to \n<a href=\'http://flockfeeds.com\'>the FlockFeeds site</a> and log\nback in to retrieve it.</p>\n\n<p>Thanks for signing up, and we hope you enjoy your feed!</p>'
+        });
+        return l.save(function() {
+          return callback();
+        });
       }
     },
     getters: {
@@ -60,6 +79,11 @@
           self = this;
           return REST.get(this.url, function(response) {
             var content_type, location;
+            if (!(response)) {
+              self.content = '';
+              self.save();
+              return null;
+            }
             if (response.status >= 200 && response.status < 300) {
               content_type = response.headers['Content-Type'] || response.headers['content-type'];
               Logger.debug("Link", ("Content Type: " + (content_type)));
